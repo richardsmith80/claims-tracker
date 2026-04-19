@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tony Vaughn — Claims Tracker FY2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+:root{--navy:#0f2444;--navy2:#1a3560;--teal:#1a7fa8;--teal2:#22a8db;--gold:#c9922a;--green:#1a7a4a;--green-bg:#e8f7ee;--red:#c0392b;--red-bg:#fdecea;--amber:#d97706;--amber-bg:#fef3c7;--bg:#f0f4f9;--card:#fff;--border:#dde3ed;--text:#1a2640;--muted:#6b7a99;--stripe:#f7f9fc}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+.hdr{background:linear-gradient(135deg,var(--navy),var(--navy2));padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.hdr h1{font-size:15px;font-weight:700;color:#fff}.hdr p{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px;font-family:'DM Mono',monospace}
+.hdr-r{font-size:11px;color:rgba(255,255,255,.5);font-family:'DM Mono',monospace}
+.tabbar{background:var(--navy);display:flex;padding:0 24px;border-bottom:2px solid var(--teal);overflow-x:auto}
+.tab{padding:9px 16px;font-size:12px;font-weight:600;color:rgba(255,255,255,.5);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;white-space:nowrap}
+.tab:hover{color:rgba(255,255,255,.85)}.tab.on{color:var(--teal2);border-bottom-color:var(--teal2)}
+.mbar{background:var(--card);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.mbar label{font-size:11px;font-weight:600;color:var(--muted);margin-right:4px}
+.mbtn{padding:4px 14px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.mbtn:hover{border-color:var(--teal);color:var(--teal)}.mbtn.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.mbtn.ytd.on{background:var(--gold);border-color:var(--gold)}
+.content{padding:14px 24px;max-width:1400px;margin:0 auto}
+.panel{display:none}.panel.on{display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--teal)}
+.sc.gold::before{background:var(--gold)}.sc.green::before{background:var(--green)}.sc.navy::before{background:var(--navy)}
+.sc-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.sc-val{font-size:24px;font-weight:700;color:var(--navy);line-height:1.1;margin:4px 0 2px;font-family:'DM Mono',monospace}
+.sc-sub{font-size:10px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.ctitle{padding:9px 14px;font-size:12px;font-weight:700;color:var(--navy);border-bottom:1px solid var(--border);background:var(--stripe)}
+table{width:100%;border-collapse:collapse}
+th{padding:7px 10px;text-align:center;font-size:10px;font-weight:700;color:#fff;background:var(--navy);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+th.L{text-align:left}
+td{padding:6px 10px;text-align:center;border-bottom:1px solid var(--border);font-size:12px}
+td.L{text-align:left;font-weight:600}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:var(--stripe)}
+tr.tot td{background:var(--navy)!important;color:#fff!important;font-weight:700}
+.mn{font-family:'DM Mono',monospace}.dash{color:var(--border)}
+.bmet{background:var(--green-bg);color:var(--green);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+.bmiss{background:var(--red-bg);color:var(--red);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+.bwarn{background:var(--amber-bg);color:var(--amber);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+.bref{background:var(--stripe);color:var(--muted);padding:2px 8px;border-radius:12px;font-size:11px}
+.prog{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:3px}
+.pfill{height:100%;border-radius:3px;background:var(--teal)}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pc{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.ph{padding:9px 12px;background:var(--navy);color:#fff;font-weight:700;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.ph small{font-size:11px;font-weight:400;opacity:.7}
+.pstats{display:flex;border-bottom:1px solid var(--border)}
+.ps{flex:1;padding:6px 8px;text-align:center;border-right:1px solid var(--border)}
+.ps:last-child{border-right:none}
+.ps-v{font-size:15px;font-weight:700;color:var(--navy);font-family:'DM Mono',monospace}
+.ps-l{font-size:10px;color:var(--muted);line-height:1.4}
+.pb{padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pb h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.pb ul{padding-left:14px}.pb li{font-size:11px;line-height:1.6}
+.full{grid-column:1/-1}
+.info-box{padding:8px 14px;font-size:12px;color:var(--muted);line-height:1.6;background:var(--stripe);border-bottom:1px solid var(--border)}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.chart-wrap{padding:14px;height:260px}
+
+.hdr::before{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:#c9922a}
+.hdr{position:relative}
+</style></head><body>
+<div class="hdr"><div><h1>Tony Vaughn</h1><p>Individual Performance Tracker · FY2026 · Mann-Grandstaff VAMC</p></div><div class="hdr-r">Dept of Veterans Affairs</div></div>
+<div class="tabbar"><div class="tabon" data-t="summary">📊 Overview</div><div class="tab" data-t="weekly">📅 Weekly</div><div class="tab" data-t="thresh">⚠️ Threshold</div><div class="tab" data-t="charts">📈 Charts</div></div>
+<div class="mbar"><label>MONTH:</label><button class="mbtn" data-m="Feb 2026">Feb 2026</button><button class="mbtn" data-m="Mar 2026">Mar 2026</button><button class="mbtn on" data-m="Apr 2026">Apr 2026</button><button class="mbtn ytd" data-m="YTD">YTD</button></div>
+<div class="content"><div id="p-summary" class="panel on"></div><div id="p-weekly" class="panel"></div><div id="p-thresh" class="panel"></div><div id="p-charts" class="panel"></div></div>
+<script>
+const ALL_CORE=["Thomas Banks","Tony Vaughn","Trent Crabtree","Richard Smith","Kelly Young","Alyson Atwater","Dakota Hackworth"];
+const MOS=["Oct 2025","Nov 2025","Dec 2025","Jan 2026","Feb 2026","Mar 2026","Apr 2026"];
+const D={
+  "Oct 2025":{w:["Oct 5-11","Oct 12-18","Oct 19-25","Oct 26-Nov1"],m:{"Thomas Banks":[0,0,0,0],"Tony Vaughn":[13,45,114,9],"Trent Crabtree":[161,88,148,36],"Richard Smith":[7,22,28,164],"Kelly Young":[284,82,405,164],"Alyson Atwater":[0,0,0,0],"Dakota Hackworth":[0,0,0,0]},o:[5,5,149,0]},
+  "Nov 2025":{w:["Nov 2-8","Nov 9-15","Nov 16-22","Nov 23-29"],m:{"Thomas Banks":[0,0,0,0],"Tony Vaughn":[44,12,67,103],"Trent Crabtree":[89,75,51,15],"Richard Smith":[2,0,0,0],"Kelly Young":[109,8,28,2],"Alyson Atwater":[0,0,23,0],"Dakota Hackworth":[0,0,0,0]},o:[1,16,82,18]},
+  "Dec 2025":{w:["Dec 7-13","Dec 14-20","Dec 21-27"],m:{"Thomas Banks":[0,0,0],"Tony Vaughn":[216,56,131],"Trent Crabtree":[111,65,23],"Richard Smith":[2,0,29],"Kelly Young":[0,0,0],"Alyson Atwater":[0,0,0],"Dakota Hackworth":[0,0,0]},o:[27,43,6]},
+  "Jan 2026":{w:["Jan 1-3","Jan 4-10","Jan 11-17","Jan 18-24","Jan 25-31"],m:{"Thomas Banks":[0,0,0,0,151],"Tony Vaughn":[414,300,338,242,43],"Trent Crabtree":[71,104,105,37,149],"Richard Smith":[9,17,162,18,98],"Kelly Young":[2,2,2,1,96],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[0,0,0,0,0]},o:[10,32,44,4,2]},
+  "Feb 2026":{w:["Feb 1-7","Feb 8-14","Feb 15-21","Feb 22-28"],m:{"Thomas Banks":[221,147,197,66],"Tony Vaughn":[154,242,211,127],"Trent Crabtree":[184,417,72,161],"Richard Smith":[31,183,9,27],"Kelly Young":[45,5,5,6],"Alyson Atwater":[34,2,0,0],"Dakota Hackworth":[0,0,0,0]},o:[4,10,43,49]},
+  "Mar 2026":{w:["Mar 1-6","Mar 8-14","Mar 15-21","Mar 22-28","Mar 29-31"],m:{"Thomas Banks":[144,244,223,342,41],"Tony Vaughn":[227,138,257,121,51],"Trent Crabtree":[115,235,130,194,88],"Richard Smith":[44,35,17,25,8],"Kelly Young":[20,100,107,75,0],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[0,0,170,105,50]},o:[52,67,90,84,0]},
+  "Apr 2026":{w:["Apr 1-4","Apr 5-11"],m:{"Thomas Banks":[93,123],"Tony Vaughn":[118,124],"Trent Crabtree":[91,281],"Richard Smith":[6,49],"Kelly Young":[1,13],"Alyson Atwater":[0,0],"Dakota Hackworth":[113,174]},o:[0,35]}
+};
+const FA={
+  "Thomas Banks":   {t:1841,d:49,l:"Feb 1–Apr 11"},
+  "Tony Vaughn":    {t:1770,d:46,l:"Feb 1–Apr 11"},
+  "Trent Crabtree": {t:1968,d:50,l:"Feb 1–Apr 11"},
+  "Dakota Hackworth":{t:612,d:20,l:"Mar 15–Apr 11"}
+};
+const NOTES={
+  "Thomas Banks":{s:["YTD leader in paper queue. Owned paper backlog from Jan 2026.","Strong Q2 — 631 modified Feb, 994 Mar. Primary backlog reduction driver.","Consistent upward trajectory every month since joining tracking."],d:["Modified lower in Q1 — build more balanced processing profile.","Ensure throughput maintained as paper backlog decreases."],g:["Target 37.6+ avg/day. Begin cross-training on modified workflow."]},
+  "Tony Vaughn":{s:["Highest community claims volume on team.","1,337 modified Jan 2026 — exceptional single-month performance.","Clear Q1 FY2026 leader Oct–Dec 2025."],d:["Volume dips at month-end — warrants monitoring.","March lower vs Feb — review workload distribution."],g:["Maintain 38.5+ avg/day. Sustain bi-weekly threshold pass rate."]},
+  "Trent Crabtree":{s:["Highest Claims Modified ceiling on team — 281 in Apr 5-11 alone.","834 modified Feb 2026 — highest single month on team.","39.4 avg/day is now highest on the team."],d:["Significant week-to-week variation alongside sharp dips.","Pacing and consistent throughput are primary development areas."],g:["Establish bi-weekly minimum floor. Reduce variance between best and lowest weeks."]},
+  "Richard Smith":{s:["Supervisor/lead — volume reflects dual processing and supervisory duties.","304 modified Jan 2026 demonstrating strong processing capability.","Reliable team anchor across multiple months."],d:["Lower raw volume reflects supervisory duties — document separately.","Establish processing targets accounting for supervisory time."],g:["Define monthly processing targets accounting for supervisory hours."]},
+  "Kelly Young":{s:["Exceptional Q1 — 935 modified Oct 2025 alone.","Strong reengagement Feb–Mar 2026 showing renewed consistency.","High-capacity processor when fully active."],d:["Activity gaps across several months need documentation.","Consistency is the primary development area — capacity is not the issue."],g:["No zero-output weeks going forward. Build full-month consistency."]},
+  "Alyson Atwater":{s:["Active contributor Oct–Feb. Cross-trained on created and modified workflows.","Solid productivity Nov 2025 modified queue."],d:["No recorded activity from Mar 2026 — status should be confirmed.","Earlier months show capacity not sustained through Q2."],g:["Confirm current role/status. Re-establish processing targets if active."]},
+  "Dakota Hackworth":{s:["612 modified in first 4 weeks of tracked processing — exceptional ramp-up.","174 modified Apr 5-11 — strongest single-week total on the team.","Immediate high-capacity contributor to both paper and modified queues."],d:["First full month in progress — Apr 2026 will establish full baseline.","90% threshold tracking now active — focus on week-over-week consistency."],g:["Target 500+ modified for full Apr 2026. Sustain 30+ avg/day pace."]}
+};
+
+const CORE=["Tony Vaughn"];
+const NAME="Tony Vaughn";
+
+const mT=(mo,n)=>(D[mo]?.m[n]||[]).reduce((a,b)=>a+b,0);
+const ytd=n=>MOS.reduce((s,m)=>s+mT(m,n),0);
+const aw=(mo,n)=>(D[mo]?.m[n]||[]).filter(v=>v>0).length;
+const ytdAW=n=>MOS.reduce((s,m)=>s+aw(m,n),0);
+const avgM=(mo,n)=>{const w=aw(mo,n),t=mT(mo,n);return w>0?(t/(w*5)).toFixed(1):"—"};
+const perfA=n=>FA[n]?(FA[n].t/FA[n].d).toFixed(1):(()=>{const w=ytdAW(n),t=ytd(n);return w>0?(t/(w*5)).toFixed(1):"—"})();
+const perfL=n=>FA[n]?`since ${FA[n].l}`:"active days";
+const ytdA=n=>{const w=ytdAW(n),t=ytd(n);return w>0?(t/(w*5)).toFixed(1):"—"};
+const fmt=n=>n>0?n.toLocaleString():'<span class="dash">—</span>';
+
+let curMo,curTab,CH={};
+
+function initMo(mo){curMo=mo;document.querySelectorAll('.mbtn').forEach(b=>b.classList.toggle('on',b.dataset.m===mo))}
+function initTab(tab){curTab=tab;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.t===tab));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));const el=document.getElementById('p-'+tab);if(el)el.classList.add('on')}
+
+document.addEventListener('click',e=>{
+  if(e.target.dataset.t){const t=e.target.dataset.t;curTab=t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.t===t));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));const el=document.getElementById('p-'+t);if(el){el.classList.add('on');go(t)}}
+  if(e.target.dataset.m){curMo=e.target.dataset.m;document.querySelectorAll('.mbtn').forEach(b=>b.classList.toggle('on',b.dataset.m===curMo));go(curTab)}
+});
+
+function go(t){
+  if(t==='summary')rSum();
+  else if(t==='weekly')rWeek();
+  else if(t==='lb')rLB();
+  else if(t==='thresh')rThresh();
+  else if(t==='charts')rCharts();
+  else if(t==='notes')rNotes();
+}
+
+function rSum(){
+  const mos=curMo==='YTD'?MOS:[curMo],lbl=curMo==='YTD'?'YTD FY2026':curMo;
+  const gT=n=>mos.reduce((s,m)=>s+mT(m,n),0);
+  const cT=CORE.reduce((s,n)=>s+gT(n),0),oT=mos.reduce((s,m)=>s+D[m].o.reduce((a,b)=>a+b,0),0);
+  const top=CORE.reduce((b,n)=>gT(n)>gT(b)?n:b,CORE[0]);
+  const moc=curMo==='YTD'?MOS.map(m=>`<th>${m}</th>`).join(''):'';
+  const rows=CORE.map(n=>{const t=gT(n),w=mos.reduce((s,m)=>s+aw(m,n),0),av=w>0?(t/(w*5)).toFixed(1):"—";return`<tr><td class="L">${n}</td><td class="mn">${fmt(t)}</td><td class="mn">${av}</td>${curMo==='YTD'?MOS.map(m=>`<td class="mn">${fmt(mT(m,n))}</td>`).join(''):''}</tr>`}).join('');
+  document.getElementById('p-summary').innerHTML=`<div class="stats"><div class="sc"><div class="sc-lbl">Team Total (${lbl})</div><div class="sc-val">${(cT+oT).toLocaleString()}</div><div class="sc-sub">all staff</div></div><div class="sc gold"><div class="sc-lbl">Core Staff</div><div class="sc-val">${cT.toLocaleString()}</div><div class="sc-sub">${CORE.length} tracked</div></div><div class="sc green"><div class="sc-lbl">Top Producer</div><div class="sc-val" style="font-size:16px;padding-top:3px">${top.split(' ')[0]}</div><div class="sc-sub">${gT(top).toLocaleString()} claims</div></div><div class="sc navy"><div class="sc-lbl">Other Staff</div><div class="sc-val">${oT.toLocaleString()}</div><div class="sc-sub">non-core</div></div></div><div class="card"><div class="ctitle">Claims Modified — ${lbl}</div><table><thead><tr><th class="L">Staff Member</th><th>Total</th><th>Avg/Day</th>${moc}</tr></thead><tbody>${rows}<tr class="tot"><td class="L">Grand Total</td><td class="mn">${(cT+oT).toLocaleString()}</td><td>—</td>${curMo==='YTD'?MOS.map(m=>`<td class="mn">${(CORE.reduce((s,n)=>s+mT(m,n),0)+D[m].o.reduce((a,b)=>a+b,0)).toLocaleString()}</td>`).join(''):''}</tr></tbody></table></div>`;
+}
+
+function rWeek(){
+  const mos=curMo==='YTD'?MOS:[curMo];
+  document.getElementById('p-weekly').innerHTML=mos.map(mo=>{const d=D[mo];return`<div class="card"><div class="ctitle">${mo}</div><table><thead><tr><th class="L">Staff</th>${d.w.map(w=>`<th>${w}</th>`).join('')}<th>Total</th><th>Avg/Day</th></tr></thead><tbody>${CORE.map(n=>{const v=d.m[n]||[];const t=v.reduce((a,b)=>a+b,0);return`<tr><td class="L">${n}</td>${v.map(x=>`<td class="mn">${fmt(x)}</td>`).join('')}<td class="mn" style="font-weight:700">${fmt(t)}</td><td class="mn">${avgM(mo,n)}</td></tr>`}).join('')}<tr><td class="L" style="color:var(--muted);font-style:italic;font-weight:400">Other Staff</td>${d.o.map(x=>`<td class="mn" style="color:var(--muted)">${fmt(x)}</td>`).join('')}<td class="mn" style="color:var(--muted)">${fmt(d.o.reduce((a,b)=>a+b,0))}</td><td>—</td></tr><tr class="tot"><td class="L">Grand Total</td>${d.w.map((_,wi)=>`<td class="mn">${(CORE.reduce((s,n)=>s+(d.m[n]?.[wi]||0),0)+d.o[wi]).toLocaleString()}</td>`).join('')}<td class="mn">${(CORE.reduce((s,n)=>s+mT(mo,n),0)+d.o.reduce((a,b)=>a+b,0)).toLocaleString()}</td><td>—</td></tr></tbody></table></div>`}).join('');
+}
+
+function rLB(){
+  const gT=n=>curMo==='YTD'?ytd(n):mT(curMo,n),gA=n=>curMo==='YTD'?ytdA(n):avgM(curMo,n);
+  const s=[...CORE].map(n=>({n,t:gT(n),a:gA(n)})).sort((a,b)=>b.t-a.t);
+  const md=['🥇','🥈','🥉'];
+  document.getElementById('p-lb').innerHTML=`<div class="card"><div class="ctitle">Leaderboard — ${curMo==='YTD'?'YTD FY2026':curMo}</div><table><thead><tr><th>#</th><th class="L">Staff Member</th><th>Total</th><th>Avg/Day</th><th>Relative</th>${MOS.map(m=>`<th>${m}</th>`).join('')}</tr></thead><tbody>${s.map((e,i)=>`<tr><td style="font-size:15px">${md[i]||i+1}</td><td class="L">${e.n}</td><td class="mn" style="font-size:15px;font-weight:700">${e.t>0?e.t.toLocaleString():'—'}</td><td class="mn">${e.a}</td><td style="min-width:140px"><div class="prog"><div class="pfill" style="width:${s[0].t>0?Math.round(e.t/s[0].t*100):0}%"></div></div></td>${MOS.map(m=>`<td class="mn">${fmt(mT(m,e.n))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+function rThresh(){
+  const periods=[{l:"Jan 18-31",mo:"Jan 2026",wks:[3,4],base:true},{l:"Feb 1-14",mo:"Feb 2026",wks:[0,1]},{l:"Feb 15-28",mo:"Feb 2026",wks:[2,3]},{l:"Mar 1-14",mo:"Mar 2026",wks:[0,1]},{l:"Mar 15-28",mo:"Mar 2026",wks:[2,3]},{l:"Mar 29-Apr 11",mo:"Mar 2026",wks:[4],apr:[0,1]}];
+  const pT=(p,n)=>{let t=p.wks.reduce((s,wi)=>s+(D[p.mo].m[n]?.[wi]||0),0);if(p.apr)t+=p.apr.reduce((s,wi)=>s+(D["Apr 2026"].m[n]?.[wi]||0),0);return t};
+  const track=periods.filter(p=>!p.base);
+  const rows=CORE.map(n=>{let prev=pT(periods[0],n),met=0,tot=0;const cells=track.map(p=>{const cur=pT(p,n);if(prev===0){prev=cur;return`<td><span class="bref">${cur>0?cur:'—'}</span></td>`}tot++;const need=Math.round(prev*.9),short=need-cur,ratio=cur/prev;prev=cur;if(ratio>=.9){met++;return`<td><span class="bmet">✅ ${cur.toLocaleString()}</span><br><span style="font-size:9px;color:var(--green)">needed ${need}</span></td>`}return`<td><span class="bmiss">❌ ${cur.toLocaleString()}</span><br><span style="font-size:9px;color:var(--red)">short ${short}</span></td>`});const rate=tot>0?Math.round(met/tot*100):null;const rb=rate===null?'<span class="bref">—</span>':rate===100?`<span class="bmet">${rate}%</span>`:rate>=50?`<span class="bwarn">${rate}%</span>`:`<span class="bmiss">${rate}%</span>`;return`<tr><td class="L">${n}</td><td class="mn">${pT(periods[0],n)||'—'}</td>${cells.join('')}<td style="font-weight:700">${tot>0?`${met}/${tot}`:'—'}</td><td>${rb}</td></tr>`}).join('');
+  document.getElementById('p-thresh').innerHTML=`<div class="card"><div class="info-box">2-week periods. 90%+ of prior period = ✅ Met. Jan 18–31 baseline. Policy effective Feb 2026.</div><div class="ctitle">Bi-Weekly 90% Threshold</div><table><thead><tr><th class="L">Staff Member</th><th>Jan 18-31<br><small>baseline</small></th>${track.map(p=>`<th>${p.l}</th>`).join('')}<th>Met</th><th>Rate</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function rCharts(){
+  Object.values(CH).forEach(c=>c.destroy());CH={};
+  const act=CORE.filter(n=>ytd(n)>0);
+  const cl=['#1a7fa8','#c9922a','#2e7d32','#7b1fa2','#d32f2f','#0288d1','#558b2f'];
+  document.getElementById('p-charts').innerHTML=`<div class="charts-grid"><div class="card"><div class="ctitle">Monthly claims by staff</div><div class="chart-wrap"><canvas id="c1"></canvas></div></div><div class="card"><div class="ctitle">Month-over-month trend</div><div class="chart-wrap"><canvas id="c2"></canvas></div></div></div><div class="card"><div class="ctitle">Apr 2026 weekly volume</div><div style="padding:14px;height:220px"><canvas id="c3"></canvas></div></div>`;
+  const o={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},boxWidth:10}}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}};
+  setTimeout(()=>{
+    CH.c1=new Chart(document.getElementById('c1'),{type:'bar',data:{labels:MOS,datasets:act.map((n,i)=>({label:n,backgroundColor:cl[i]+'cc',data:MOS.map(m=>mT(m,n))}))},options:o});
+    CH.c2=new Chart(document.getElementById('c2'),{type:'line',data:{labels:MOS,datasets:act.map((n,i)=>({label:n,borderColor:cl[i],backgroundColor:cl[i]+'22',data:MOS.map(m=>mT(m,n)),tension:.3,pointRadius:3}))},options:o});
+    const md=D["Apr 2026"],an=CORE.filter(n=>mT("Apr 2026",n)>0);
+    CH.c3=new Chart(document.getElementById('c3'),{type:'bar',data:{labels:md.w,datasets:an.map((n,i)=>({label:n,backgroundColor:cl[i]+'cc',data:md.m[n]}))},options:{...o,scales:{x:{...o.scales.x,stacked:true},y:{...o.scales.y,stacked:true}}}});
+  },80);
+}
+
+function rNotes(){
+  document.getElementById('p-notes').innerHTML=`<div class="pgrid">${CORE.map(n=>{const t=ytd(n),pa=perfA(n),pl=perfL(n),p=NOTES[n],best=MOS.reduce((b,m)=>mT(m,n)>mT(b,n)?m:b,MOS[0]);return`<div class="pc"><div class="ph"><span>${n}</span><small>YTD: ${t.toLocaleString()}</small></div><div class="pstats"><div class="ps"><div class="ps-v">${t.toLocaleString()}</div><div class="ps-l">YTD Total</div></div><div class="ps"><div class="ps-v">${pa}</div><div class="ps-l">Avg/Day<br><span style="font-size:9px">${pl}</span></div></div><div class="ps"><div class="ps-v" style="font-size:12px">${best}</div><div class="ps-l">Best Month</div></div><div class="ps"><div class="ps-v">${mT(best,n).toLocaleString()}</div><div class="ps-l">Best Month Total</div></div></div><div class="pb"><div><h4>Strengths</h4><ul>${p.s.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><h4>Development</h4><ul>${p.d.map(x=>`<li>${x}</li>`).join('')}</ul></div><div class="full"><h4>Goals</h4><ul>${p.g.map(x=>`<li>${x}</li>`).join('')}</ul></div></div></div>`}).join('')}</div>`;
+}
+
+
+function rSoloSummary(name){
+  const mos=curMo==='YTD'?MOS:[curMo],lbl=curMo==='YTD'?'YTD FY2026':curMo;
+  const gT=()=>mos.reduce((s,m)=>s+mT(m,name),0);
+  const t=gT(),w=mos.reduce((s,m)=>s+aw(m,name),0),av=w>0?(t/(w*5)).toFixed(1):"—";
+  const best=MOS.reduce((b,m)=>mT(m,name)>mT(b,name)?m:b,MOS[0]);
+  const moc=curMo==='YTD'?MOS.map(m=>`<th>${m}</th>`).join(''):'';
+  const mo_rows=curMo==='YTD'?MOS.map(m=>{const v=mT(m,name);return`<tr><td class="L">${m}</td><td class="mn" style="font-size:14px;font-weight:700">${fmt(v)}</td><td class="mn">${avgM(m,name)}</td></tr>`}).join(''):'';
+  const pa=perfA(name),pl=perfL(name),p=NOTES[name];
+  document.getElementById('p-summary').innerHTML=`
+    <div class="stats">
+      <div class="sc"><div class="sc-lbl">${lbl} Total</div><div class="sc-val">${fmt(t)}</div><div class="sc-sub">claims modified</div></div>
+      <div class="sc gold"><div class="sc-lbl">Avg / Day</div><div class="sc-val">${pa}</div><div class="sc-sub">${pl}</div></div>
+      <div class="sc green"><div class="sc-lbl">Best Month</div><div class="sc-val" style="font-size:16px;padding-top:3px">${best.replace(' 202','<br>202')}</div><div class="sc-sub">${mT(best,name).toLocaleString()} claims</div></div>
+      <div class="sc navy"><div class="sc-lbl">YTD Total</div><div class="sc-val">${ytd(name).toLocaleString()}</div><div class="sc-sub">all tracked months</div></div>
+    </div>
+    ${curMo==='YTD'?`<div class="card"><div class="ctitle">Monthly Breakdown</div><table><thead><tr><th class="L">Month</th><th>Total</th><th>Avg/Day</th></tr></thead><tbody>${mo_rows}</tbody></table></div>`:''}
+    <div class="card"><div class="ctitle">Performance Notes</div><div class="pb" style="display:block;padding:14px"><div style="margin-bottom:10px"><h4>Strengths</h4><ul style="margin-top:4px">${p.s.map(x=>`<li style="font-size:12px;line-height:1.7">${x}</li>`).join('')}</ul></div><div style="margin-bottom:10px"><h4>Development Areas</h4><ul style="margin-top:4px">${p.d.map(x=>`<li style="font-size:12px;line-height:1.7">${x}</li>`).join('')}</ul></div><div><h4>Goals</h4><ul style="margin-top:4px">${p.g.map(x=>`<li style="font-size:12px;line-height:1.7">${x}</li>`).join('')}</ul></div></div></div>`;
+}
+
+function rSoloWeek(name){
+  const mos=curMo==='YTD'?MOS:[curMo];
+  document.getElementById('p-weekly').innerHTML=mos.map(mo=>{const d=D[mo];const v=d.m[name]||[];const t=v.reduce((a,b)=>a+b,0);return`<div class="card"><div class="ctitle">${mo}</div><table><thead><tr>${d.w.map(w=>`<th>${w}</th>`).join('')}<th>Total</th><th>Avg/Day</th></tr></thead><tbody><tr>${v.map(x=>`<td class="mn" style="font-size:14px;font-weight:600">${fmt(x)}</td>`).join('')}<td class="mn" style="font-size:15px;font-weight:700;color:var(--navy)">${fmt(t)}</td><td class="mn">${avgM(mo,name)}</td></tr></tbody></table></div>`}).join('');
+}
+
+function rSoloChart(name){
+  Object.values(CH).forEach(c=>c.destroy());CH={};
+  const cl='#1a7fa8';
+  document.getElementById('p-charts').innerHTML=`<div class="charts-grid"><div class="card"><div class="ctitle">Monthly totals</div><div class="chart-wrap"><canvas id="c1"></canvas></div></div><div class="card"><div class="ctitle">Weekly trend</div><div class="chart-wrap"><canvas id="c2"></canvas></div></div></div>`;
+  const o={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}};
+  setTimeout(()=>{
+    CH.c1=new Chart(document.getElementById('c1'),{type:'bar',data:{labels:MOS,datasets:[{label:name,backgroundColor:cl+'cc',data:MOS.map(m=>mT(m,name))}]},options:o});
+    const allWks=[],allVals=[];
+    MOS.forEach(mo=>{D[mo].w.forEach((w,wi)=>{allWks.push(w);allVals.push(D[mo].m[name]?.[wi]||0)});});
+    CH.c2=new Chart(document.getElementById('c2'),{type:'line',data:{labels:allWks,datasets:[{label:name,borderColor:cl,backgroundColor:cl+'22',data:allVals,tension:.3,pointRadius:3}]},options:o});
+  },80);
+}
+
+function rSoloThresh(name){
+  const periods=[{l:"Jan 18-31",mo:"Jan 2026",wks:[3,4],base:true},{l:"Feb 1-14",mo:"Feb 2026",wks:[0,1]},{l:"Feb 15-28",mo:"Feb 2026",wks:[2,3]},{l:"Mar 1-14",mo:"Mar 2026",wks:[0,1]},{l:"Mar 15-28",mo:"Mar 2026",wks:[2,3]},{l:"Mar 29-Apr 11",mo:"Mar 2026",wks:[4],apr:[0,1]}];
+  const pT=(p,n)=>{let t=p.wks.reduce((s,wi)=>s+(D[p.mo].m[n]?.[wi]||0),0);if(p.apr)t+=p.apr.reduce((s,wi)=>s+(D["Apr 2026"].m[n]?.[wi]||0),0);return t};
+  const track=periods.filter(p=>!p.base);
+  let prev=pT(periods[0],name),met=0,tot=0;
+  const rows=track.map(p=>{const cur=pT(p,name);if(prev===0){prev=cur;return`<tr><td class="L">${p.l}</td><td class="mn">${cur>0?cur:'—'}</td><td>—</td><td><span class="bref">est. baseline</span></td></tr>`}tot++;const need=Math.round(prev*.9),short=need-cur,ratio=cur/prev;prev=cur;const ok=ratio>=.9;if(ok)met++;return`<tr><td class="L">${p.l}</td><td class="mn" style="font-size:14px;font-weight:700">${cur.toLocaleString()}</td><td class="mn">${need}</td><td>${ok?`<span class="bmet">✅ Met</span>`:`<span class="bmiss">❌ Short by ${short}</span>`}</td></tr>`}).join('');
+  const rate=tot>0?Math.round(met/tot*100):0;
+  const rb=rate===100?`<span class="bmet">${rate}%</span>`:rate>=50?`<span class="bwarn">${rate}%</span>`:`<span class="bmiss">${rate}%</span>`;
+  document.getElementById('p-thresh').innerHTML=`<div class="stats" style="grid-template-columns:repeat(3,1fr)"><div class="sc"><div class="sc-lbl">Periods Tracked</div><div class="sc-val">${tot}</div></div><div class="sc green"><div class="sc-lbl">Periods Met</div><div class="sc-val">${met}</div></div><div class="sc ${rate>=90?'green':rate>=50?'gold':'navy'}"><div class="sc-lbl">Pass Rate</div><div class="sc-val">${rate}%</div></div></div><div class="card"><div class="info-box">2-week periods compared to prior period. 90%+ = Met. Jan 18–31 is the baseline.</div><div class="ctitle">Bi-Weekly 90% Threshold</div><table><thead><tr><th class="L">Period</th><th>Total</th><th>Needed (90%)</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+const _go=go;
+function go(t){
+  if(t==='summary')rSoloSummary(NAME);
+  else if(t==='weekly')rSoloWeek(NAME);
+  else if(t==='thresh')rSoloThresh(NAME);
+  else if(t==='charts')rSoloChart(NAME);
+}
+initMo('Apr 2026');initTab('summary');go('summary');
+</script></body></html>
