@@ -5,48 +5,38 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:#0f2444;min-height:100vh;display:flex;flex-direction:column}
-.hdr{padding:20px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.1)}
-.hdr h1{font-size:18px;font-weight:700;color:#fff}.hdr p{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;font-family:'DM Mono',monospace}
-.hdr-r{font-size:11px;color:rgba(255,255,255,.4);font-family:'DM Mono',monospace}
-.nav{display:flex;gap:8px;padding:16px 32px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap;align-items:center}
+.hdr{padding:18px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.1)}
+.hdr h1{font-size:17px;font-weight:700;color:#fff}.hdr p{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;font-family:'DM Mono',monospace}
+.nav{display:flex;gap:8px;padding:14px 32px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap;align-items:center}
 .nav-label{font-size:11px;font-weight:600;color:rgba(255,255,255,.4);margin-right:4px;text-transform:uppercase;letter-spacing:.08em}
 .nbtn{padding:8px 20px;border-radius:6px;font-size:12px;font-weight:600;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.6);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
 .nbtn:hover{border-color:rgba(255,255,255,.5);color:#fff;background:rgba(255,255,255,.08)}
 .nbtn.on{border-color:transparent;color:#fff}
-.nbtn.team.on{background:#1a7fa8}
-.nbtn.thomas.on{background:#1a7fa8}
-.nbtn.tony.on{background:#c9922a}
-.nbtn.trent.on{background:#2e7d32}
-.nbtn.dakota.on{background:#7b1fa2}
+.nbtn.team.on{background:#1a7fa8}.nbtn.thomas.on{background:#1a7fa8}
+.nbtn.tony.on{background:#c9922a}.nbtn.trent.on{background:#2e7d32}.nbtn.dakota.on{background:#7b1fa2}
 .frame-wrap{flex:1;position:relative}
-iframe{width:100%;height:100%;border:none;display:block;min-height:calc(100vh - 110px)}
-.loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0f2444;color:rgba(255,255,255,.5);font-size:14px;pointer-events:none;transition:opacity .3s}
-.loading.hidden{opacity:0}
-</style>
-</head><body>
-<div class="hdr">
-  <div><h1>Claims Tracker Hub — Mann-Grandstaff VAMC</h1><p>FY2026 · Select a view below</p></div>
-  <div class="hdr-r">Dept of Veterans Affairs</div>
-</div>
+iframe{width:100%;height:100%;border:none;display:block;min-height:calc(100vh - 108px)}
+.loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0f2444;color:rgba(255,255,255,.5);font-size:14px;pointer-events:none;transition:opacity .3s}
+.loader.hidden{opacity:0}
+</style></head><body>
+<div class="hdr"><div><h1>Claims Tracker Hub — Mann-Grandstaff VAMC</h1><p>FY2026 · Select a view below</p></div><div style="font-size:11px;color:rgba(255,255,255,.4);font-family:'DM Mono',monospace">Dept of Veterans Affairs</div></div>
 <div class="nav">
   <span class="nav-label">View:</span>
-  <button class="nbtn team on"   data-src="team.html"              onclick="load(this)">📊 Full Team</button>
-  <button class="nbtn thomas"    data-src="Thomas_Banks.html"      onclick="load(this)">Thomas Banks</button>
-  <button class="nbtn tony"      data-src="Tony_Vaughn.html"       onclick="load(this)">Tony Vaughn</button>
-  <button class="nbtn trent"     data-src="Trent_Crabtree.html"    onclick="load(this)">Trent Crabtree</button>
-  <button class="nbtn dakota"    data-src="Dakota_Hackworth.html"  onclick="load(this)">Dakota Hackworth</button>
+  <button class="nbtn team on"  data-src="team.html"             onclick="load(this)">📊 Full Team</button>
+  <button class="nbtn thomas"   data-src="Thomas_Banks.html"     onclick="load(this)">Thomas Banks</button>
+  <button class="nbtn tony"     data-src="Tony_Vaughn.html"      onclick="load(this)">Tony Vaughn</button>
+  <button class="nbtn trent"    data-src="Trent_Crabtree.html"   onclick="load(this)">Trent Crabtree</button>
+  <button class="nbtn dakota"   data-src="Dakota_Hackworth.html" onclick="load(this)">Dakota Hackworth</button>
 </div>
 <div class="frame-wrap">
-  <div class="loading" id="loader">Loading...</div>
+  <div class="loader" id="loader">Loading...</div>
   <iframe id="frame" src="team.html" onload="document.getElementById('loader').classList.add('hidden')"></iframe>
 </div>
 <script>
 function load(btn){
   document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  const loader=document.getElementById('loader');
-  loader.classList.remove('hidden');
+  document.getElementById('loader').classList.remove('hidden');
   document.getElementById('frame').src=btn.dataset.src;
 }
-</script>
-</body></html>
+</script></body></html>
