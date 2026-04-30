@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claims Tracker — Mann-Grandstaff VAMC FY2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --navy:#0f2444;--navy2:#1a3560;--teal:#1a7fa8;--teal2:#22a8db;
+    --gold:#c9922a;--gold2:#f0b53f;--green:#1a7a4a;--green-bg:#e8f7ee;
+    --red:#c0392b;--red-bg:#fdecea;--amber:#d97706;--amber-bg:#fef3c7;
+    --bg:#f0f4f9;--card:#ffffff;--border:#dde3ed;--text:#1a2640;
+    --muted:#6b7a99;--stripe:#f7f9fc;
+    --accent:#1a7fa8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+
+  /* ── VIEW SWITCHER ── */
+  .view-bar{background:var(--navy);padding:0 24px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:3px solid var(--accent)}
+  .view-bar label{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-right:4px;padding:12px 0}
+  .vbtn{padding:10px 18px;font-size:12px;font-weight:600;color:rgba(255,255,255,.5);background:transparent;border:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-3px;transition:all .15s;white-space:nowrap;font-family:'DM Sans',sans-serif}
+  .vbtn:hover{color:rgba(255,255,255,.85)}
+  .vbtn.on{color:#fff;border-bottom-color:var(--accent)}
+
+  /* ── HEADER ── */
+  .header{background:linear-gradient(135deg,var(--navy),var(--navy2));padding:11px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+  .header h1{font-size:15px;font-weight:700;color:#fff;letter-spacing:.02em}
+  .header p{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px;font-family:'DM Mono',monospace}
+  .header-right{font-size:11px;color:rgba(255,255,255,.4);font-family:'DM Mono',monospace}
+
+  /* ── TAB BAR ── */
+  .tabbar{background:var(--navy);display:flex;gap:2px;padding:0 24px;border-bottom:2px solid var(--teal);overflow-x:auto}
+  .tab{padding:9px 16px;font-size:12px;font-weight:600;color:rgba(255,255,255,.5);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;white-space:nowrap}
+  .tab:hover{color:rgba(255,255,255,.85)}
+  .tab.active{color:var(--teal2);border-bottom-color:var(--teal2)}
+
+  /* ── MONTH BAR ── */
+  .month-bar{background:var(--card);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .month-bar label{font-size:11px;font-weight:600;color:var(--muted);margin-right:4px}
+  .mbtn{padding:4px 13px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+  .mbtn:hover{border-color:var(--teal);color:var(--teal)}
+  .mbtn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .mbtn.ytd.active{background:var(--gold);border-color:var(--gold)}
+
+  /* ── CONTENT ── */
+  .content{padding:14px 24px;max-width:1400px;margin:0 auto}
+  .view{display:none}.view.active{display:block}
+  .panel{display:none}.panel.active{display:block}
+
+  /* ── STAT CARDS ── */
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:14px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent)}
+  .stat-card.gold::before{background:var(--gold)}
+  .stat-card.green::before{background:var(--green)}
+  .stat-card.navy::before{background:var(--navy)}
+  .stat-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .stat-val{font-size:24px;font-weight:700;color:var(--navy);line-height:1.1;margin:4px 0 2px;font-family:'DM Mono',monospace}
+  .stat-sub{font-size:10px;color:var(--muted)}
+
+  /* ── TABLES ── */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px}
+  .card-title{padding:9px 14px;font-size:12px;font-weight:700;color:var(--navy);border-bottom:1px solid var(--border);background:var(--stripe)}
+  table{width:100%;border-collapse:collapse}
+  th{padding:7px 10px;text-align:center;font-size:10px;font-weight:700;color:#fff;background:var(--navy);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+  th.left{text-align:left}
+  td{padding:6px 10px;text-align:center;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)}
+  td.left{text-align:left;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  tr:nth-child(even) td{background:var(--stripe)}
+  tr.total-row td{background:var(--navy)!important;color:#fff!important;font-weight:700}
+  .num{font-family:'DM Mono',monospace}
+  .dash{color:var(--border)}
+
+  /* ── BADGES ── */
+  .badge-met{background:var(--green-bg);color:var(--green);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+  .badge-miss{background:var(--red-bg);color:var(--red);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+  .badge-warn{background:var(--amber-bg);color:var(--amber);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;white-space:nowrap}
+  .badge-ref{background:#f0f4f9;color:var(--muted);padding:2px 8px;border-radius:12px;font-size:11px}
+
+  /* ── PROGRESS ── */
+  .prog-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:3px}
+  .prog-fill{height:100%;border-radius:3px;background:var(--accent)}
+
+  /* ── PERF NOTES ── */
+  .perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .perf-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .perf-head{padding:9px 12px;background:var(--navy);color:#fff;font-weight:700;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+  .perf-head small{font-size:11px;font-weight:400;opacity:.7}
+  .perf-stats{display:flex;border-bottom:1px solid var(--border)}
+  .ps{flex:1;padding:6px 8px;text-align:center;border-right:1px solid var(--border)}
+  .ps:last-child{border-right:none}
+  .ps-val{font-size:15px;font-weight:700;color:var(--navy);font-family:'DM Mono',monospace}
+  .ps-lbl{font-size:10px;color:var(--muted);line-height:1.4}
+  .perf-body{padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .perf-section h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
+  .perf-section ul{padding-left:14px}
+  .perf-section li{font-size:11px;line-height:1.7}
+  .full{grid-column:1/-1}
+
+  /* ── SOLO VIEW ── */
+  .solo-head{background:linear-gradient(135deg,var(--navy),var(--navy2));padding:14px 24px;border-bottom:3px solid var(--accent)}
+  .solo-head h2{font-size:18px;font-weight:700;color:#fff}
+  .solo-head p{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;font-family:'DM Mono',monospace}
+
+  /* ── CHART ── */
+  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+  .chart-wrap{padding:14px;height:260px}
+  .info-box{padding:8px 14px;font-size:12px;color:var(--muted);line-height:1.6;background:var(--stripe);border-bottom:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<!-- ── VIEW SWITCHER ── -->
+<div class="view-bar">
+  <label>VIEW:</label>
+  <button class="vbtn on" onclick="switchView('team',this)">📊 Full Team</button>
+  <button class="vbtn" onclick="switchView('thomas',this)" style="--accent:#1a7fa8">Thomas Banks</button>
+  <button class="vbtn" onclick="switchView('tony',this)" style="--accent:#c9922a">Tony Vaughn</button>
+  <button class="vbtn" onclick="switchView('trent',this)" style="--accent:#2e7d32">Trent Crabtree</button>
+  <button class="vbtn" onclick="switchView('dakota',this)" style="--accent:#7b1fa2">Dakota Hackworth</button>
+</div>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div><h1 id="hdr-title">Claims Processing Tracker — Mann-Grandstaff VAMC</h1><p id="hdr-sub">FY2026 &nbsp;·&nbsp; Oct 2025 – Apr 2026 &nbsp;·&nbsp; All Staff</p></div>
+  <div class="header-right">Dept of Veterans Affairs</div>
+</div>
+
+<!-- ── TAB BAR ── -->
+<div class="tabbar" id="tabbar">
+  <div class="tab active" onclick="switchTab('summary',event)">📊 Summary</div>
+  <div class="tab" onclick="switchTab('weekly',event)">📅 Weekly Detail</div>
+  <div class="tab" onclick="switchTab('leaderboard',event)">🏆 Leaderboard</div>
+  <div class="tab" onclick="switchTab('threshold',event)">⚠️ 90% Threshold</div>
+  <div class="tab" onclick="switchTab('charts',event)">📈 Charts</div>
+  <div class="tab" onclick="switchTab('notes',event)">📝 Performance Notes</div>
+</div>
+
+<!-- ── MONTH BAR ── -->
+<div class="month-bar" id="month-bar">
+  <label>MONTH:</label>
+</div>
+
+<!-- ── CONTENT ── -->
+<div class="content">
+  <div id="panel-summary"     class="panel active"></div>
+  <div id="panel-weekly"      class="panel"></div>
+  <div id="panel-leaderboard" class="panel"></div>
+  <div id="panel-threshold"   class="panel"></div>
+  <div id="panel-charts"      class="panel"></div>
+  <div id="panel-notes"       class="panel"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
+const ALL_CORE = ["Thomas Banks","Tony Vaughn","Trent Crabtree","Richard Smith","Kelly Young","Alyson Atwater","Dakota Hackworth"];
+const SOLO_NAMES = {
+  thomas:"Thomas Banks", tony:"Tony Vaughn",
+  trent:"Trent Crabtree", dakota:"Dakota Hackworth"
+};
+const SOLO_COLORS = {
+  thomas:"#1a7fa8", tony:"#c9922a", trent:"#2e7d32", dakota:"#7b1fa2"
+};
+const MONTHS = ["Oct 2025","Nov 2025","Dec 2025","Jan 2026","Feb 2026","Mar 2026","Apr 2026"];
+
+const DATA = {
+  "Oct 2025":{weeks:["Oct 5-11","Oct 12-18","Oct 19-25","Oct 26-Nov1"],wd:[5,4,5,5],
+    modified:{"Thomas Banks":[0,0,0,0],"Tony Vaughn":[13,45,114,9],"Trent Crabtree":[161,88,148,36],"Richard Smith":[7,22,28,164],"Kelly Young":[284,82,405,164],"Alyson Atwater":[0,0,0,0],"Dakota Hackworth":[0,0,0,0]},others_m:[5,5,149,0]},
+  "Nov 2025":{weeks:["Nov 2-8","Nov 9-15","Nov 16-22","Nov 23-29"],wd:[5,4,5,4],
+    modified:{"Thomas Banks":[0,0,0,0],"Tony Vaughn":[44,12,67,103],"Trent Crabtree":[89,75,51,15],"Richard Smith":[2,0,0,0],"Kelly Young":[109,8,28,2],"Alyson Atwater":[0,0,23,0],"Dakota Hackworth":[0,0,0,0]},others_m:[1,16,82,18]},
+  "Dec 2025":{weeks:["Dec 7-13","Dec 14-20","Dec 21-27"],wd:[5,5,4],
+    modified:{"Thomas Banks":[0,0,0],"Tony Vaughn":[216,56,131],"Trent Crabtree":[111,65,23],"Richard Smith":[2,0,29],"Kelly Young":[0,0,0],"Alyson Atwater":[0,0,0],"Dakota Hackworth":[0,0,0]},others_m:[27,43,6]},
+  "Jan 2026":{weeks:["Jan 1-3","Jan 4-10","Jan 11-17","Jan 18-24","Jan 25-31"],wd:[4,5,5,4,5],
+    modified:{"Thomas Banks":[0,0,0,0,151],"Tony Vaughn":[414,300,338,242,43],"Trent Crabtree":[71,104,105,37,149],"Richard Smith":[9,17,162,18,98],"Kelly Young":[2,2,2,1,96],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[0,0,0,0,0]},others_m:[10,32,44,4,2]},
+  "Feb 2026":{weeks:["Feb 1-7","Feb 8-14","Feb 15-21","Feb 22-28"],wd:[5,5,4,5],
+    modified:{"Thomas Banks":[221,147,197,66],"Tony Vaughn":[154,242,211,127],"Trent Crabtree":[184,417,72,161],"Richard Smith":[31,183,9,27],"Kelly Young":[45,5,5,6],"Alyson Atwater":[34,2,0,0],"Dakota Hackworth":[0,0,0,0]},others_m:[4,10,43,49]},
+  "Mar 2026":{weeks:["Mar 1-6","Mar 8-14","Mar 15-21","Mar 22-28","Mar 29-31"],wd:[5,5,5,5,3],
+    modified:{"Thomas Banks":[144,244,223,342,41],"Tony Vaughn":[227,138,257,121,51],"Trent Crabtree":[115,235,130,194,88],"Richard Smith":[44,35,17,25,8],"Kelly Young":[20,100,107,75,0],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[0,0,170,105,50]},others_m:[52,67,90,84,0]},
+  "Apr 2026":{weeks:["Apr 1-4","Apr 5-11","Apr 12-18","Apr 19-24"],wd:[4,5,5,5],
+    modified:{"Thomas Banks":[93,123,137,163],"Tony Vaughn":[118,124,169,144],"Trent Crabtree":[91,281,209,287],"Richard Smith":[6,49,49,20],"Kelly Young":[1,13,1,1],"Alyson Atwater":[0,0,0,0],"Dakota Hackworth":[113,174,294,186]},others_m:[0,35,43,5]}
+};
+
+const FIXED_AVG = {
+  "Thomas Banks":   {total:2141,days:59,label:"Feb 1–Apr 24"},
+  "Tony Vaughn":    {total:2083,days:54,label:"Feb 1–Apr 24"},
+  "Trent Crabtree": {total:2464,days:60,label:"Feb 1–Apr 24"},
+  "Dakota Hackworth":{total:1092,days:30,label:"Mar 15–Apr 24"}
+};
+
+const PERF_NOTES = {
+  "Thomas Banks":{
+    strengths:["YTD leader in paper queue. Owned paper backlog from Jan 2026.","Strong Q2 — 631 modified Feb, 994 Mar. Primary backlog reduction driver.","Consistent upward trajectory every month since joining tracking."],
+    development:["Modified lower in Q1 — build more balanced processing profile.","Ensure throughput maintained as paper backlog decreases."],
+    goals:["Target 37+ avg/day. Continue cross-training on modified workflow."]},
+  "Tony Vaughn":{
+    strengths:["Highest community claims volume on team.","1,337 modified Jan 2026 — exceptional single-month performance.","Clear Q1 FY2026 leader Oct–Dec 2025."],
+    development:["Volume dips at month-end — warrants monitoring.","March lower vs Feb — review workload distribution."],
+    goals:["Maintain 38.6+ avg/day. Sustain bi-weekly threshold pass rate."]},
+  "Trent Crabtree":{
+    strengths:["Highest avg/day on the team at 41.1 — now the top performer by pace.","834 modified Feb + 287 modified Apr 19-24 — elite ceiling.","Best-in-class Claims Modified output across Q2 FY2026."],
+    development:["Week-to-week variation still present — consolidate consistency.","Ensure pacing holds as workload type may shift."],
+    goals:["Maintain 41+ avg/day. Target 90% threshold every bi-weekly period."]},
+  "Richard Smith":{
+    strengths:["Supervisor/lead — volume reflects dual processing and supervisory duties.","304 modified Jan 2026 demonstrating strong processing capability.","Reliable team anchor across multiple months."],
+    development:["Lower raw volume reflects supervisory duties — document separately.","Establish processing targets accounting for supervisory time."],
+    goals:["Define monthly processing targets accounting for supervisory hours."]},
+  "Kelly Young":{
+    strengths:["Exceptional Q1 — 935 modified Oct 2025 alone.","Strong reengagement Feb–Mar 2026 showing renewed consistency.","High-capacity processor when fully active."],
+    development:["Activity gaps across several months need documentation.","Consistency is the primary development area — capacity is not the issue."],
+    goals:["No zero-output weeks going forward. Build full-month consistency."]},
+  "Alyson Atwater":{
+    strengths:["Active contributor Oct–Feb. Cross-trained on created and modified workflows.","Solid productivity Nov 2025 modified queue."],
+    development:["No recorded activity from Mar 2026 — status should be confirmed.","Earlier months show capacity not sustained through Q2."],
+    goals:["Confirm current role/status. Re-establish processing targets if active."]},
+  "Dakota Hackworth":{
+    strengths:["1,092 modified in first 6 weeks of tracking — among the strongest ramp-ups on record.","186 modified Apr 19-24 alone — elite-level weekly pace.","36.4 avg/day — approaching top-tier performance on the team."],
+    development:["First full month just completed — maintain consistency going into May.","90% threshold tracking active — focus on period-over-period consistency."],
+    goals:["Target 36+ avg/day sustained through Q3 FY2026. Meet 90% threshold every period."]}
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let currentView = 'team';
+let currentTab  = 'summary';
+let currentMonth = 'Apr 2026';
+let CORE = [...ALL_CORE];
+let chartInstances = {};
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+const modTotal  = (mo,n) => (DATA[mo]?.modified[n]||[]).reduce((a,b)=>a+b,0);
+const ytdTotal  = n => MONTHS.reduce((s,m)=>s+modTotal(m,n),0);
+const activeDays= (mo,n) => { const v=DATA[mo]?.modified[n]||[],w=DATA[mo]?.wd||[]; return v.reduce((s,x,i)=>s+(x>0?w[i]:0),0); };
+const ytdActDays= n => MONTHS.reduce((s,m)=>s+activeDays(m,n),0);
+const avgDay    = (mo,n) => { const a=activeDays(mo,n),t=modTotal(mo,n); return a>0?(t/a).toFixed(1):"—"; };
+const ytdAvgDay = n => { const a=ytdActDays(n),t=ytdTotal(n); return a>0?(t/a).toFixed(1):"—"; };
+const perfAvgDay= n => FIXED_AVG[n] ? (FIXED_AVG[n].total/FIXED_AVG[n].days).toFixed(1) : ytdAvgDay(n);
+const perfLabel = n => FIXED_AVG[n] ? `since ${FIXED_AVG[n].label}` : "active days";
+const fmt       = n => n>0 ? n.toLocaleString() : '<span class="dash">—</span>';
+const pct       = (a,b) => b>0 ? Math.round(a/b*100) : 0;
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function switchView(view, btn) {
+  currentView = view;
+  // Accent color
+  const colors = {team:'#1a7fa8',thomas:'#1a7fa8',tony:'#c9922a',trent:'#2e7d32',dakota:'#7b1fa2'};
+  document.documentElement.style.setProperty('--accent', colors[view]||'#1a7fa8');
+  // Active button
+  document.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  // Core list
+  CORE = view==='team' ? [...ALL_CORE] : ALL_CORE.filter(n=>n===SOLO_NAMES[view]);
+  // Header
+  document.getElementById('hdr-title').textContent = view==='team'
+    ? 'Claims Processing Tracker — Mann-Grandstaff VAMC'
+    : SOLO_NAMES[view];
+  document.getElementById('hdr-sub').textContent = view==='team'
+    ? 'FY2026 · Oct 2025 – Apr 2026 · All Staff'
+    : 'Individual Performance Tracker · FY2026 · Mann-Grandstaff VAMC';
+  // Tabs — solo hides leaderboard
+  const lbTab = document.querySelector('[onclick*="leaderboard"]');
+  lbTab.style.display = view==='team' ? '' : 'none';
+  if (currentTab==='leaderboard' && view!=='team') {
+    currentTab='summary';
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelector('[onclick*="summary"]').classList.add('active');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-summary').classList.add('active');
+  }
+  // Month bar
+  buildMonthBar(view);
+  renderPanel(currentTab);
+}
+
+function switchTab(tab, e) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  e.target.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  renderPanel(tab);
+}
+
+function setMonth(mo) {
+  currentMonth = mo;
+  document.querySelectorAll('.mbtn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.mbtn[data-m="${mo}"]`).classList.add('active');
+  renderPanel(currentTab);
+}
+
+function buildMonthBar(view) {
+  const start = (view==='dakota') ? 'Mar 2026' : 'Oct 2025';
+  const mos = MONTHS.filter(m=>MONTHS.indexOf(m)>=MONTHS.indexOf(start));
+  const bar = document.getElementById('month-bar');
+  bar.innerHTML = '<label>MONTH:</label>' +
+    mos.map(m=>`<button class="mbtn${m===currentMonth?' active':''}" data-m="${m}" onclick="setMonth('${m}')">${m}</button>`).join('') +
+    `<button class="mbtn ytd${currentMonth==='YTD'?' active':''}" data-m="YTD" onclick="setMonth('YTD')">YTD</button>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDERERS
+// ═══════════════════════════════════════════════════════════════
+function renderPanel(tab) {
+  if(tab==='summary')    renderSummary();
+  if(tab==='weekly')     renderWeekly();
+  if(tab==='leaderboard')renderLeaderboard();
+  if(tab==='threshold')  renderThreshold();
+  if(tab==='charts')     renderCharts();
+  if(tab==='notes')      renderNotes();
+}
+
+// ── SUMMARY ─────────────────────────────────────────────────────
+function renderSummary() {
+  const isYTD = currentMonth==='YTD';
+  const mos   = isYTD ? MONTHS : [currentMonth];
+  const label = isYTD ? 'YTD FY2026' : currentMonth;
+  const solo  = currentView!=='team';
+  const soloName = solo ? SOLO_NAMES[currentView] : null;
+
+  const getT = n => mos.reduce((s,m)=>s+modTotal(m,n),0);
+  const coreTotal = CORE.reduce((s,n)=>s+getT(n),0);
+  const otherTotal = solo ? 0 : mos.reduce((s,m)=>s+DATA[m].others_m.reduce((a,b)=>a+b,0),0);
+  const top = CORE.reduce((b,n)=>getT(n)>getT(b)?n:b, CORE[0]);
+
+  let statsHtml, tableHtml;
+
+  if (solo) {
+    const n=soloName, t=getT(n), pa=perfAvgDay(n), pl=perfLabel(n);
+    const best=MONTHS.reduce((b,m)=>modTotal(m,n)>modTotal(b,n)?m:b,MONTHS[0]);
+    statsHtml = `
+      <div class="stat-card"><div class="stat-label">${label} Total</div><div class="stat-val num">${t.toLocaleString()}</div><div class="stat-sub">claims modified</div></div>
+      <div class="stat-card gold"><div class="stat-label">Avg / Day</div><div class="stat-val num">${pa}</div><div class="stat-sub">${pl}</div></div>
+      <div class="stat-card green"><div class="stat-label">Best Month</div><div class="stat-val" style="font-size:15px;padding-top:4px">${best}</div><div class="stat-sub">${modTotal(best,n).toLocaleString()} claims</div></div>
+      <div class="stat-card navy"><div class="stat-label">YTD Total</div><div class="stat-val num">${ytdTotal(n).toLocaleString()}</div><div class="stat-sub">all tracked months</div></div>`;
+    if (isYTD) {
+      const rows = MONTHS.map(m=>{const v=modTotal(m,n);return v?`<tr><td class="left">${m}</td><td class="num" style="font-weight:700;font-size:14px">${v.toLocaleString()}</td><td class="num">${avgDay(m,n)}</td></tr>`:''}).join('');
+      tableHtml = `<div class="card"><div class="card-title">Monthly Breakdown</div><table><thead><tr><th class="left">Month</th><th>Total</th><th>Avg/Day</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    } else { tableHtml = ''; }
+  } else {
+    statsHtml = `
+      <div class="stat-card"><div class="stat-label">Team Total (${label})</div><div class="stat-val num">${(coreTotal+otherTotal).toLocaleString()}</div><div class="stat-sub">all staff</div></div>
+      <div class="stat-card gold"><div class="stat-label">Core Staff Total</div><div class="stat-val num">${coreTotal.toLocaleString()}</div><div class="stat-sub">${CORE.length} tracked</div></div>
+      <div class="stat-card green"><div class="stat-label">Top Producer</div><div class="stat-val" style="font-size:16px;padding-top:3px">${top.split(' ')[0]}</div><div class="stat-sub">${getT(top).toLocaleString()} claims</div></div>
+      <div class="stat-card navy"><div class="stat-label">Other Staff</div><div class="stat-val num">${otherTotal.toLocaleString()}</div><div class="stat-sub">non-core contributors</div></div>`;
+    const moCols = isYTD ? MONTHS.map(m=>`<th>${m}</th>`).join('') : '';
+    const rows = CORE.map(n=>{const t=getT(n),w=mos.reduce((s,m)=>s+activeDays(m,n),0),av=w>0?(t/(w)).toFixed(1):"—";return`<tr><td class="left">${n}</td><td class="num">${fmt(t)}</td><td class="num">${av}</td>${isYTD?MONTHS.map(m=>`<td class="num">${fmt(modTotal(m,n))}</td>`).join(''):''}</tr>`}).join('');
+    tableHtml = `<div class="card"><div class="card-title">📋 Claims Modified — ${label}</div><table><thead><tr><th class="left">Staff Member</th><th>Total</th><th>Avg/Day</th>${moCols}</tr></thead><tbody>${rows}<tr class="total-row"><td class="left">GRAND TOTAL</td><td class="num">${(coreTotal+otherTotal).toLocaleString()}</td><td>—</td>${isYTD?MONTHS.map(m=>`<td class="num">${(CORE.reduce((s,n)=>s+modTotal(m,n),0)+DATA[m].others_m.reduce((a,b)=>a+b,0)).toLocaleString()}</td>`).join(''):''}</tr></tbody></table></div>`;
+  }
+  document.getElementById('panel-summary').innerHTML = `<div class="stat-row">${statsHtml}</div>${tableHtml}`;
+}
+
+// ── WEEKLY ───────────────────────────────────────────────────────
+function renderWeekly() {
+  const mos = currentMonth==='YTD' ? MONTHS : [currentMonth];
+  const solo = currentView!=='team';
+  const soloName = solo ? SOLO_NAMES[currentView] : null;
+  let html = '';
+  mos.forEach(mo=>{
+    const d=DATA[mo];
+    if (solo) {
+      const vals=d.modified[soloName]||[], t=vals.reduce((a,b)=>a+b,0);
+      if (!t) return;
+      html+=`<div class="card" style="margin-bottom:14px"><div class="card-title">📅 ${mo}</div><table><thead><tr>${d.weeks.map(w=>`<th>${w}</th>`).join('')}<th>Total</th><th>Avg/Day</th></tr></thead><tbody><tr>${vals.map(v=>`<td class="num" style="font-size:14px;font-weight:700">${fmt(v)}</td>`).join('')}<td class="num" style="font-size:15px;font-weight:700;color:var(--navy)">${t.toLocaleString()}</td><td class="num">${avgDay(mo,soloName)}</td></tr></tbody></table></div>`;
+    } else {
+      html+=`<div class="card" style="margin-bottom:14px"><div class="card-title">📅 ${mo}</div><table><thead><tr><th class="left">Staff Member</th>${d.weeks.map(w=>`<th>${w}</th>`).join('')}<th>Total</th><th>Avg/Day</th></tr></thead><tbody>${ALL_CORE.map(n=>{const v=d.modified[n]||[],t=v.reduce((a,b)=>a+b,0);return`<tr><td class="left">${n}</td>${v.map(x=>`<td class="num">${fmt(x)}</td>`).join('')}<td class="num" style="font-weight:700">${fmt(t)}</td><td class="num">${avgDay(mo,n)}</td></tr>`}).join('')}<tr><td class="left" style="color:var(--muted);font-style:italic;font-weight:400">Other Staff</td>${d.others_m.map(x=>`<td class="num" style="color:var(--muted)">${fmt(x)}</td>`).join('')}<td class="num" style="color:var(--muted)">${fmt(d.others_m.reduce((a,b)=>a+b,0))}</td><td>—</td></tr><tr class="total-row"><td class="left">Grand Total</td>${d.weeks.map((_,wi)=>`<td class="num">${(ALL_CORE.reduce((s,n)=>s+(d.modified[n]?.[wi]||0),0)+d.others_m[wi]).toLocaleString()}</td>`).join('')}<td class="num">${(ALL_CORE.reduce((s,n)=>s+modTotal(mo,n),0)+d.others_m.reduce((a,b)=>a+b,0)).toLocaleString()}</td><td>—</td></tr></tbody></table></div>`;
+    }
+  });
+  document.getElementById('panel-weekly').innerHTML = html;
+}
+
+// ── LEADERBOARD ──────────────────────────────────────────────────
+function renderLeaderboard() {
+  const medals=['🥇','🥈','🥉'];
+  const sorted=[...ALL_CORE].map(n=>({n,t:currentMonth==='YTD'?ytdTotal(n):modTotal(currentMonth,n),a:currentMonth==='YTD'?ytdAvgDay(n):avgDay(currentMonth,n)})).sort((a,b)=>b.t-a.t);
+  const rows=sorted.map((e,i)=>`<tr><td style="font-size:16px">${medals[i]||i+1}</td><td class="left">${e.n}</td><td class="num" style="font-size:15px;font-weight:700">${e.t>0?e.t.toLocaleString():'<span class="dash">—</span>'}</td><td class="num">${e.a}</td><td style="min-width:140px"><div class="prog-bar"><div class="prog-fill" style="width:${pct(e.t,sorted[0].t)}%"></div></div></td>${MONTHS.map(m=>`<td class="num">${fmt(modTotal(m,e.n))}</td>`).join('')}</tr>`).join('');
+  document.getElementById('panel-leaderboard').innerHTML=`<div class="card"><div class="card-title">🏆 Leaderboard — ${currentMonth==='YTD'?'YTD FY2026':currentMonth}</div><table><thead><tr><th>#</th><th class="left">Staff Member</th><th>Total</th><th>Avg/Day</th><th>Relative</th>${MONTHS.map(m=>`<th>${m}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+// ── THRESHOLD ────────────────────────────────────────────────────
+function renderThreshold() {
+  const solo = currentView!=='team';
+  const soloName = solo ? SOLO_NAMES[currentView] : null;
+  const periods=[
+    {l:"Jan 18-31",mo:"Jan 2026",wks:[3,4],base:true},
+    {l:"Feb 1-14", mo:"Feb 2026",wks:[0,1]},
+    {l:"Feb 15-28",mo:"Feb 2026",wks:[2,3]},
+    {l:"Mar 1-14", mo:"Mar 2026",wks:[0,1]},
+    {l:"Mar 15-28",mo:"Mar 2026",wks:[2,3]},
+    {l:"Mar 29–Apr 11",mo:"Mar 2026",wks:[4],apr:[0,1]},
+    {l:"Apr 12-24",mo:"Apr 2026",wks:[2,3]}
+  ];
+  const pT=(p,n)=>{let t=p.wks.reduce((s,wi)=>s+(DATA[p.mo]?.modified[n]?.[wi]||0),0);if(p.apr)t+=p.apr.reduce((s,wi)=>s+(DATA["Apr 2026"]?.modified[n]?.[wi]||0),0);return t};
+  const track=periods.filter(p=>!p.base);
+
+  if (solo) {
+    const n=soloName;
+    let prev=pT(periods[0],n),met=0,tot=0;
+    const rows=track.map(p=>{const cur=pT(p,n);if(prev===0){prev=cur;return`<tr><td class="left">${p.l}</td><td class="num">${cur||'—'}</td><td>—</td><td><span class="badge-ref">est. baseline</span></td></tr>`}tot++;const need=Math.round(prev*.9),short=need-cur,ratio=cur/prev;prev=cur;const ok=ratio>=.9;if(ok)met++;return`<tr><td class="left">${p.l}</td><td class="num" style="font-size:14px;font-weight:700">${cur.toLocaleString()}</td><td class="num">${need}</td><td>${ok?`<span class="badge-met">✅ Met</span>`:`<span class="badge-miss">❌ Short by ${short}</span>`}</td></tr>`}).join('');
+    const rate=tot>0?Math.round(met/tot*100):0;
+    document.getElementById('panel-threshold').innerHTML=`
+      <div class="stat-row" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card"><div class="stat-label">Periods Tracked</div><div class="stat-val num">${tot}</div></div>
+        <div class="stat-card green"><div class="stat-label">Periods Met</div><div class="stat-val num">${met}</div></div>
+        <div class="stat-card ${rate===100?'green':rate>=50?'gold':'navy'}"><div class="stat-label">Pass Rate</div><div class="stat-val num">${rate}%</div></div>
+      </div>
+      <div class="card"><div class="info-box">2-week periods vs prior period. 90%+ = Met. Jan 18–31 is your baseline.</div><div class="card-title">⚠️ Bi-Weekly 90% Threshold</div><table><thead><tr><th class="left">Period</th><th>Your Total</th><th>Needed (90%)</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  } else {
+    const rows=ALL_CORE.map(name=>{let prev=pT(periods[0],name),met=0,tot=0;const cells=track.map(p=>{const cur=pT(p,name);if(prev===0){prev=cur;return`<td><span class="badge-ref">${cur>0?cur:'—'}</span></td>`}tot++;const need=Math.round(prev*.9),short=need-cur,ratio=cur/prev;prev=cur;if(ratio>=.9){met++;return`<td><span class="badge-met">✅ ${cur.toLocaleString()}</span><br><span style="font-size:9px;color:var(--green)">needed ${need}</span></td>`}return`<td><span class="badge-miss">❌ ${cur.toLocaleString()}</span><br><span style="font-size:9px;color:var(--red)">short ${short}</span></td>`});const rate=tot>0?Math.round(met/tot*100):null;const rb=rate===null?'<span class="badge-ref">—</span>':rate===100?`<span class="badge-met">${rate}%</span>`:rate>=50?`<span class="badge-warn">${rate}%</span>`:`<span class="badge-miss">${rate}%</span>`;return`<tr><td class="left">${name}</td><td class="num">${pT(periods[0],name)||'—'}</td>${cells.join('')}<td style="font-weight:700">${tot>0?`${met}/${tot}`:'—'}</td><td>${rb}</td></tr>`}).join('');
+    document.getElementById('panel-threshold').innerHTML=`<div class="card"><div class="info-box">2-week periods. 90%+ of prior period = ✅ Met. Jan 18–31 baseline. Policy effective Feb 2026.</div><div class="card-title">⚠️ Bi-Weekly 90% Threshold — Feb 2026 onward</div><table><thead><tr><th class="left">Staff Member</th><th>Jan 18-31<br><small>baseline</small></th>${track.map(p=>`<th>${p.l}</th>`).join('')}<th>Met</th><th>Rate</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+}
+
+// ── CHARTS ───────────────────────────────────────────────────────
+function renderCharts() {
+  Object.values(chartInstances).forEach(c=>c.destroy()); chartInstances={};
+  const solo=currentView!=='team', soloName=solo?SOLO_NAMES[currentView]:null;
+  const color=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1a7fa8';
+  const colors=['#1a7fa8','#c9922a','#2e7d32','#7b1fa2','#d32f2f','#0288d1','#558b2f'];
+  const act=ALL_CORE.filter(n=>ytdTotal(n)>0);
+
+  document.getElementById('panel-charts').innerHTML=`
+    <div class="charts-grid">
+      <div class="card"><div class="card-title">${solo?'Monthly Totals':'Monthly Claims by Staff'}</div><div class="chart-wrap"><canvas id="chart-a"></canvas></div></div>
+      <div class="card"><div class="card-title">${solo?'Weekly Trend':'Month-over-Month Trend'}</div><div class="chart-wrap"><canvas id="chart-b"></canvas></div></div>
+    </div>`;
+
+  const o={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},boxWidth:10}}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}};
+
+  setTimeout(()=>{
+    if (solo) {
+      const n=soloName;
+      chartInstances.a=new Chart(document.getElementById('chart-a'),{type:'bar',data:{labels:MONTHS,datasets:[{label:n,backgroundColor:color+'cc',data:MONTHS.map(m=>modTotal(m,n))}]},options:{...o,plugins:{legend:{display:false}}}});
+      const allWks=[],allVals=[];
+      MONTHS.forEach(mo=>{DATA[mo].weeks.forEach((w,wi)=>{allWks.push(w);allVals.push(DATA[mo].modified[n]?.[wi]||0)})});
+      chartInstances.b=new Chart(document.getElementById('chart-b'),{type:'line',data:{labels:allWks,datasets:[{label:n,borderColor:color,backgroundColor:color+'22',data:allVals,tension:.3,pointRadius:3,fill:true}]},options:{...o,plugins:{legend:{display:false}}}});
+    } else {
+      chartInstances.a=new Chart(document.getElementById('chart-a'),{type:'bar',data:{labels:MONTHS,datasets:act.map((n,i)=>({label:n,backgroundColor:colors[i]+'cc',data:MONTHS.map(m=>modTotal(m,n))}))},options:o});
+      chartInstances.b=new Chart(document.getElementById('chart-b'),{type:'line',data:{labels:MONTHS,datasets:act.map((n,i)=>({label:n,borderColor:colors[i],backgroundColor:colors[i]+'22',data:MONTHS.map(m=>modTotal(m,n)),tension:.3,pointRadius:3}))},options:o});
+    }
+  },80);
+}
+
+// ── PERFORMANCE NOTES ────────────────────────────────────────────
+function renderNotes() {
+  const names = currentView==='team' ? ALL_CORE : [SOLO_NAMES[currentView]];
+  const html = names.map(name=>{
+    const t=ytdTotal(name),pa=perfAvgDay(name),pl=perfLabel(name),p=PERF_NOTES[name];
+    const best=MONTHS.reduce((b,m)=>modTotal(m,name)>modTotal(b,name)?m:b,MONTHS[0]);
+    return `<div class="perf-card">
+      <div class="perf-head"><span>${name}</span><small>YTD: ${t.toLocaleString()}</small></div>
+      <div class="perf-stats">
+        <div class="ps"><div class="ps-val">${t.toLocaleString()}</div><div class="ps-lbl">YTD Total</div></div>
+        <div class="ps"><div class="ps-val">${pa}</div><div class="ps-lbl">Avg/Day<br><span style="font-size:9px">${pl}</span></div></div>
+        <div class="ps"><div class="ps-val" style="font-size:12px">${best}</div><div class="ps-lbl">Best Month</div></div>
+        <div class="ps"><div class="ps-val">${modTotal(best,name).toLocaleString()}</div><div class="ps-lbl">Best Month Total</div></div>
+      </div>
+      <div class="perf-body">
+        <div class="perf-section"><h4>✅ Strengths</h4><ul>${p.strengths.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+        <div class="perf-section"><h4>⚠️ Development</h4><ul>${p.development.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+        <div class="perf-section full"><h4>🎯 Goals</h4><ul>${p.goals.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('panel-notes').innerHTML = `<div class="perf-grid">${html}</div>`;
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+buildMonthBar('team');
+renderPanel('summary');
+</script>
+</body>
+</html>
