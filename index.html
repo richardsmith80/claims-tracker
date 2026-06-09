@@ -95,7 +95,7 @@
   <button class="mbtn" onclick="setMonth('Feb 2026',this)">Feb 2026</button>
   <button class="mbtn" onclick="setMonth('Mar 2026',this)">Mar 2026</button>
   <button class="mbtn" onclick="setMonth('Apr 2026',this)">Apr 2026</button>
-  <button class="mbtn active" onclick="setMonth('May 2026',this)">May 2026</button>
+  <button class="mbtn active" onclick="setMonth('Jun 2026',this)">Jun 2026</button>
   <button class="mbtn ytd" onclick="setMonth('YTD',this)">YTD</button>
 </div>
 <div class="content">
@@ -109,23 +109,23 @@
 </div>
 <script>
 const CORE=["Thomas Banks","Tony Vaughn","Trent Crabtree","Richard Smith","Kelly Young","Alyson Atwater","Dakota Hackworth","Stephanie Sgambati"];
-const MONTHS=["Oct 2025","Nov 2025","Dec 2025","Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026"];
+const MONTHS=["Oct 2025","Nov 2025","Dec 2025","Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026"];
 const AVG_START_MONTH="Feb 2026";
-const STD_DAYS={"Feb 2026":19,"Mar 2026":21,"Apr 2026":22,"May 2026":21};
+const STD_DAYS={"Feb 2026":19,"Mar 2026":21,"Apr 2026":22,"May 2026":21,"Jun 2026":21};
 const THRESHOLD=0.75;
-const CURRENT_MONTH="May 2026";
-const TRACK_MONTHS=["Feb 2026","Mar 2026","Apr 2026","May 2026"];
+const CURRENT_MONTH="Jun 2026";
+const TRACK_MONTHS=["Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026"];
 const BASELINE_MONTH={"Thomas Banks":"Feb 2026","Tony Vaughn":"Feb 2026","Trent Crabtree":"Feb 2026","Richard Smith":"Feb 2026","Kelly Young":"Feb 2026","Alyson Atwater":"Feb 2026","Dakota Hackworth":"Mar 2026","Stephanie Sgambati":"May 2026"};
 
 const ACTIVE_DAYS={
-  "Thomas Banks":    {"Feb 2026":19,"Mar 2026":19,"Apr 2026":20,"May 2026":18},
-  "Tony Vaughn":     {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":15},
-  "Trent Crabtree":  {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":16},
-  "Richard Smith":   {"Feb 2026":17,"Mar 2026":17,"Apr 2026":17,"May 2026":14},
-  "Kelly Young":     {"Feb 2026":12,"Mar 2026":15,"Apr 2026":8, "May 2026":10},
-  "Alyson Atwater":  {"Feb 2026":6, "Mar 2026":0, "Apr 2026":0, "May 2026":0},
-  "Dakota Hackworth":{"Feb 2026":0, "Mar 2026":10,"Apr 2026":20,"May 2026":17},
-  "Stephanie Sgambati":{"Feb 2026":0,"Mar 2026":0,"Apr 2026":0,"May 2026":5}
+  "Thomas Banks":    {"Feb 2026":19,"Mar 2026":19,"Apr 2026":20,"May 2026":22,"Jun 2026":5},
+  "Tony Vaughn":     {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":20,"Jun 2026":5},
+  "Trent Crabtree":  {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":21,"Jun 2026":5},
+  "Richard Smith":   {"Feb 2026":17,"Mar 2026":17,"Apr 2026":17,"May 2026":18,"Jun 2026":4},
+  "Kelly Young":     {"Feb 2026":12,"Mar 2026":15,"Apr 2026":8, "May 2026":11,"Jun 2026":3},
+  "Alyson Atwater":  {"Feb 2026":6, "Mar 2026":0, "Apr 2026":0, "May 2026":0, "Jun 2026":0},
+  "Dakota Hackworth":{"Feb 2026":0, "Mar 2026":10,"Apr 2026":20,"May 2026":22,"Jun 2026":5},
+  "Stephanie Sgambati":{"Feb 2026":0,"Mar 2026":0,"Apr 2026":0,"May 2026":5, "Jun 2026":5}
 };
 
 const DATA={
@@ -136,7 +136,8 @@ const DATA={
   "Feb 2026":{weeks:["Feb 1-7","Feb 8-14","Feb 15-21","Feb 22-28"],wd:[5,5,4,5],modified:{"Thomas Banks":[221,147,197,66],"Tony Vaughn":[154,242,211,127],"Trent Crabtree":[184,417,72,161],"Richard Smith":[31,183,9,27],"Kelly Young":[45,5,5,6],"Alyson Atwater":[34,2,0,0],"Dakota Hackworth":[0,0,0,0],"Stephanie Sgambati":[0,0,0,0]},others_m:[4,10,43,49]},
   "Mar 2026":{weeks:["Mar 1-6","Mar 8-14","Mar 15-21","Mar 22-28","Mar 29-31"],wd:[5,5,5,5,3],modified:{"Thomas Banks":[144,244,223,342,41],"Tony Vaughn":[227,138,257,121,51],"Trent Crabtree":[115,235,130,194,88],"Richard Smith":[44,35,17,25,8],"Kelly Young":[20,100,107,75,0],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[0,0,170,105,50],"Stephanie Sgambati":[0,0,0,0,0]},others_m:[52,67,90,84,0]},
   "Apr 2026":{weeks:["Apr 1-4","Apr 5-11","Apr 12-18","Apr 19-24","Apr 28-30"],wd:[4,5,5,5,3],modified:{"Thomas Banks":[93,123,137,163,102],"Tony Vaughn":[118,124,169,144,123],"Trent Crabtree":[91,281,209,287,115],"Richard Smith":[6,49,49,20,0],"Kelly Young":[1,13,1,1,0],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[113,174,294,186,155],"Stephanie Sgambati":[0,0,0,0,0]},others_m:[0,35,43,5,0]},
-  "May 2026":{weeks:["May 1-2","May 4-9","May 10-16","May 17-23"],wd:[2,5,5,5],modified:{"Thomas Banks":[50,712,194,474],"Tony Vaughn":[64,121,116,100],"Trent Crabtree":[99,323,114,306],"Richard Smith":[0,22,48,48],"Kelly Young":[5,4,8,4],"Alyson Atwater":[0,0,0,0],"Dakota Hackworth":[89,139,195,175],"Stephanie Sgambati":[0,0,2,1]},others_m:[16,31,47,3]}
+  "May 2026":{weeks:["May 1-2","May 4-9","May 10-16","May 17-23","May 24-30"],wd:[2,5,5,5,5],modified:{"Thomas Banks":[50,712,194,474,284],"Tony Vaughn":[64,121,116,100,171],"Trent Crabtree":[99,323,114,306,154],"Richard Smith":[0,22,48,48,67],"Kelly Young":[5,4,8,4,6],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[89,139,195,175,205],"Stephanie Sgambati":[0,0,2,1,0]},others_m:[16,31,47,3,0]},
+  "Jun 2026":{weeks:["Jun 1-6"],wd:[5],modified:{"Thomas Banks":[366],"Tony Vaughn":[144],"Trent Crabtree":[260],"Richard Smith":[17],"Kelly Young":[12],"Alyson Atwater":[0],"Dakota Hackworth":[171],"Stephanie Sgambati":[28]},others_m:[2]}
 };
 
 // ── TRIPS ─────────────────────────────────────────────────────────
