@@ -115,18 +115,16 @@ const THRESHOLD=0.75;
 const CURRENT_MONTH="Jun 2026";
 const TRACK_MONTHS=["Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026"];
 const BASELINE_MONTH={"Thomas Banks":"Feb 2026","Tony Vaughn":"Feb 2026","Trent Crabtree":"Feb 2026","Richard Smith":"Feb 2026","Kelly Young":"Feb 2026","Alyson Atwater":"Feb 2026","Dakota Hackworth":"Mar 2026","Stephanie Sgambati":"Jun 2026"};
-
 const ACTIVE_DAYS={
-  "Thomas Banks":    {"Feb 2026":19,"Mar 2026":19,"Apr 2026":20,"May 2026":22,"Jun 2026":5},
-  "Tony Vaughn":     {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":20,"Jun 2026":5},
-  "Trent Crabtree":  {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":21,"Jun 2026":5},
-  "Richard Smith":   {"Feb 2026":17,"Mar 2026":17,"Apr 2026":17,"May 2026":18,"Jun 2026":4},
-  "Kelly Young":     {"Feb 2026":12,"Mar 2026":15,"Apr 2026":8, "May 2026":11,"Jun 2026":3},
+  "Thomas Banks":    {"Feb 2026":19,"Mar 2026":19,"Apr 2026":20,"May 2026":22,"Jun 2026":20},
+  "Tony Vaughn":     {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":20,"Jun 2026":20},
+  "Trent Crabtree":  {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":21,"Jun 2026":20},
+  "Richard Smith":   {"Feb 2026":17,"Mar 2026":17,"Apr 2026":17,"May 2026":18,"Jun 2026":15},
+  "Kelly Young":     {"Feb 2026":12,"Mar 2026":15,"Apr 2026":8, "May 2026":11,"Jun 2026":8},
   "Alyson Atwater":  {"Feb 2026":6, "Mar 2026":0, "Apr 2026":0, "May 2026":0, "Jun 2026":0},
-  "Dakota Hackworth":{"Feb 2026":0, "Mar 2026":10,"Apr 2026":20,"May 2026":22,"Jun 2026":5},
-  "Stephanie Sgambati":{"Feb 2026":0,"Mar 2026":0,"Apr 2026":0,"May 2026":5,"Jun 2026":5}
+  "Dakota Hackworth":{"Feb 2026":0, "Mar 2026":10,"Apr 2026":20,"May 2026":22,"Jun 2026":20},
+  "Stephanie Sgambati":{"Feb 2026":0,"Mar 2026":0,"Apr 2026":0,"May 2026":5,"Jun 2026":14}
 };
-
 const DATA={
   "Oct 2025":{weeks:["Oct 5-11","Oct 12-18","Oct 19-25","Oct 26-Nov1"],wd:[5,4,5,5],modified:{"Thomas Banks":[0,0,0,0],"Tony Vaughn":[13,45,114,9],"Trent Crabtree":[161,88,148,36],"Richard Smith":[7,22,28,164],"Kelly Young":[284,82,405,164],"Alyson Atwater":[0,0,0,0],"Dakota Hackworth":[0,0,0,0],"Stephanie Sgambati":[0,0,0,0]},others_m:[5,5,149,0]},
   "Nov 2025":{weeks:["Nov 2-8","Nov 9-15","Nov 16-22","Nov 23-29"],wd:[5,4,5,4],modified:{"Thomas Banks":[0,0,0,0],"Tony Vaughn":[44,12,67,103],"Trent Crabtree":[89,75,51,15],"Richard Smith":[2,0,0,0],"Kelly Young":[109,8,28,2],"Alyson Atwater":[0,0,23,0],"Dakota Hackworth":[0,0,0,0],"Stephanie Sgambati":[0,0,0,0]},others_m:[1,16,82,18]},
@@ -136,9 +134,8 @@ const DATA={
   "Mar 2026":{weeks:["Mar 1-6","Mar 8-14","Mar 15-21","Mar 22-28","Mar 29-31"],wd:[5,5,5,5,3],modified:{"Thomas Banks":[144,244,223,342,41],"Tony Vaughn":[227,138,257,121,51],"Trent Crabtree":[115,235,130,194,88],"Richard Smith":[44,35,17,25,8],"Kelly Young":[20,100,107,75,0],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[0,0,170,105,50],"Stephanie Sgambati":[0,0,0,0,0]},others_m:[52,67,90,84,0]},
   "Apr 2026":{weeks:["Apr 1-4","Apr 5-11","Apr 12-18","Apr 19-24","Apr 28-30"],wd:[4,5,5,5,3],modified:{"Thomas Banks":[93,123,137,163,102],"Tony Vaughn":[118,124,169,144,123],"Trent Crabtree":[91,281,209,287,115],"Richard Smith":[6,49,49,20,0],"Kelly Young":[1,13,1,1,0],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[113,174,294,186,155],"Stephanie Sgambati":[0,0,0,0,0]},others_m:[0,35,43,5,0]},
   "May 2026":{weeks:["May 1-2","May 4-9","May 10-16","May 17-23","May 24-30"],wd:[2,5,5,5,5],modified:{"Thomas Banks":[50,712,194,474,284],"Tony Vaughn":[64,121,116,100,171],"Trent Crabtree":[99,323,114,306,154],"Richard Smith":[0,22,48,48,67],"Kelly Young":[5,4,8,4,6],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[89,139,195,175,205],"Stephanie Sgambati":[0,0,2,1,0]},others_m:[16,31,47,3,0]},
-  "Jun 2026":{weeks:["Jun 1-6"],wd:[5],modified:{"Thomas Banks":[366],"Tony Vaughn":[144],"Trent Crabtree":[260],"Richard Smith":[17],"Kelly Young":[12],"Alyson Atwater":[0],"Dakota Hackworth":[171],"Stephanie Sgambati":[28]},others_m:[2]}
+  "Jun 2026":{weeks:["Jun 1-6","Jun 7-13","Jun 14-20","Jun 21-27"],wd:[5,5,5,5],modified:{"Thomas Banks":[366,196,169,136],"Tony Vaughn":[144,93,133,220],"Trent Crabtree":[260,141,179,152],"Richard Smith":[17,140,7,21],"Kelly Young":[12,7,1,0],"Alyson Atwater":[0,0,0,0],"Dakota Hackworth":[171,204,117,228],"Stephanie Sgambati":[28,6,26,2]},others_m:[2,4,2,1]}
 };
-
 const TRIPS_STAFF=["Richard Smith","Dakota Hackworth","Tony Vaughn","Kelly Young","Trent Crabtree","Thomas Banks"];
 const TRIPS_MONTHS=["Nov 2025","Dec 2025","Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026"];
 const TRIPS_MONTHLY={
@@ -149,12 +146,11 @@ const TRIPS_MONTHLY={
   "Mar 2026":{"Richard Smith":175,"Dakota Hackworth":98,"Tony Vaughn":20,"Kelly Young":0,"Trent Crabtree":4,"Thomas Banks":0},
   "Apr 2026":{"Richard Smith":130,"Dakota Hackworth":112,"Tony Vaughn":30,"Kelly Young":0,"Trent Crabtree":2,"Thomas Banks":0},
   "May 2026":{"Richard Smith":15,"Dakota Hackworth":81,"Tony Vaughn":18,"Kelly Young":0,"Trent Crabtree":1,"Thomas Banks":0},
-  "Jun 2026":{"Richard Smith":0, "Dakota Hackworth":17,"Tony Vaughn":0, "Kelly Young":0, "Trent Crabtree":0,"Thomas Banks":0}
+  "Jun 2026":{"Richard Smith":0,"Dakota Hackworth":17,"Tony Vaughn":0,"Kelly Young":0,"Trent Crabtree":0,"Thomas Banks":0}
 };
-
 const PERF_NOTES={
   "Thomas Banks":{strengths:["YTD leader in claims created. Took ownership of paper backlog from Jan 2026.","Strong Q2 FY2026 — 631 modified in Feb, 994 in Mar.","Works across all three primary workflows: paper claims creation, CITC, and Manual Review."],development:["Two documented entry errors this quarter — both self-reported immediately and corrected prior to payment processing. No financial impact.","Month-to-month variance partially explained by window rotation and calendar factors."],goals:["Target 50+ avg/day. Reduce variance. Continue cross-workflow flexibility."],q3goals:["Target ≥950 modified per month.","Maintain daily avg of 45+ claims on active days.","Meet 75% threshold every month.","No recurrence of wrong-Veteran entry errors."]},
-  "Tony Vaughn":{strengths:["Primary CITC claims processor. Deep expertise in complex community claim verification.","Consistent output across FY2026. Jan 2026 — 1,337 modified, highest single-month on team.","Met 75% threshold both evaluated months."],development:["Month-to-month variance — consistency on processing weeks is primary development area.","Currently on Window Group duty affecting May output."],goals:["Maintain avg/day ≥35. Sustain 75% threshold. Establish weekly floor of 100+ on processing weeks."],q3goals:["Target ≥650 modified per month.","Maintain daily avg of 40+ claims.","Meet 75% threshold all 3 months of Q3.","Establish reliable processing-week floor."]},
+  "Tony Vaughn":{strengths:["Primary CITC claims processor. Deep expertise in complex community claim verification.","Consistent output across FY2026. Jan 2026 — 1,337 modified, highest single-month on team.","Met 75% threshold both evaluated months."],development:["Month-to-month variance — consistency on processing weeks is primary development area.","Window Group duty periods affect monthly output."],goals:["Maintain avg/day ≥35. Sustain 75% threshold. Establish weekly floor of 100+ on processing weeks."],q3goals:["Target ≥650 modified per month.","Maintain daily avg of 40+ claims.","Meet 75% threshold all 3 months of Q3.","Establish reliable processing-week floor."]},
   "Trent Crabtree":{strengths:["Primary Manual Review claims processor — highest-complexity queue on team.","Apr 2026 — 983 modified, highest single month on team for Q2.","Daily avg approaching Exceptional standard of 45/day."],development:["Largest variance on team. Window rotation explains some dips but processing-week consistency needs improvement."],goals:["Establish weekly minimum floor. Target 75% threshold every month. Reduce variance."],q3goals:["Target ≥850 modified per month.","Maintain daily avg of 45+ claims.","First quarter with perfect threshold pass rate.","No week below 150 claims when fully active."]},
   "Richard Smith":{strengths:["Supervisor/lead role — volume reflects dual processing and supervisory responsibilities.","Strong Jan 2026 (304 modified) demonstrating processing capability.","Consistent presence across multiple months."],development:["Declining trend requires focused attention and discussion.","Missed 75% threshold both evaluated months."],goals:["Target ≥150 modified per month. Document supervisory hours separately. Meet 75% threshold at least 2 of 3 months in Q3."],q3goals:["Reverse declining trend — 150+ modified per month minimum.","Maintain daily avg of 10+ on active days.","Meet 75% threshold at least 2 of 3 months.","Document supervisory contributions formally."]},
   "Kelly Young":{strengths:["935 modified in Oct 2025 — exceptional Q1 performance.","Strong Mar 2026 reengagement (302 modified).","High-capacity processor when fully active."],development:["Extreme inconsistency — Mar (302) vs Apr (16). Only 1 of 2 months met 75% threshold.","Consistency is the core development area."],goals:["No zero-output weeks. Full-month consistency every month. Document any absences."],q3goals:["Target ≥150 modified every month of Q3.","Meet 75% threshold all 3 months.","No near-zero months."]},
