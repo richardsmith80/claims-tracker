@@ -71,7 +71,7 @@
 <div class="header">
   <div class="header-left">
     <h1>Claims Processing Tracker — Mann-Grandstaff VAMC</h1>
-    <p>FY2026 &nbsp;·&nbsp; Oct 2025 – Present &nbsp;·&nbsp; Last updated: Jul 25, 2026</p>
+    <p>FY2026 &nbsp;·&nbsp; Oct 2025 – Present &nbsp;·&nbsp; Last updated: Aug 8, 2026</p>
   </div>
 </div>
 <div class="tabbar">
@@ -94,7 +94,8 @@
   <button class="mbtn" onclick="setMonth('May 2026',this)">May 2026</button>
   <button class="mbtn" onclick="setMonth('Jun 2026',this)">Jun 2026</button>
   <button class="mbtn" onclick="setMonth('Jul 2026',this)">Jul 2026</button>
-  <button class="mbtn active" onclick="setMonth('YTD',this)">YTD</button>
+  <button class="mbtn" onclick="setMonth('Aug 2026',this)">Aug 2026</button>
+  <button class="mbtn ytd active" onclick="setMonth('YTD',this)">YTD</button>
 </div>
 <div class="content">
   <div id="panel-summary" class="panel active"></div>
@@ -105,68 +106,59 @@
   <div id="panel-notes" class="panel"></div>
 </div>
 <script>
-var CORE = ["Thomas Banks","Tony Vaughn","Trent Crabtree","Richard Smith","Kelly Young","Alyson Atwater","Dakota Hackworth","Stephanie Sgambati"];
-var MONTHS = ["Oct 2025","Nov 2025","Dec 2025","Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026","Jul 2026"];
-var AVG_START = "Feb 2026";
-var STD_DAYS = {"Feb 2026":19,"Mar 2026":21,"Apr 2026":22,"May 2026":21,"Jun 2026":21,"Jul 2026":23};
-var THRESHOLD = 0.75;
-var CURRENT_MONTH = "Jul 2026";
-var TRACK_MONTHS = ["Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026","Jul 2026"];
-var BASELINE_MONTH = {"Thomas Banks":"Feb 2026","Tony Vaughn":"Feb 2026","Trent Crabtree":"Feb 2026","Richard Smith":"Feb 2026","Kelly Young":"Feb 2026","Alyson Atwater":"Feb 2026","Dakota Hackworth":"Mar 2026","Stephanie Sgambati":"Jun 2026"};
-var ACTIVE_DAYS = {
-  "Thomas Banks":     {"Feb 2026":19,"Mar 2026":19,"Apr 2026":20,"May 2026":22,"Jun 2026":21,"Jul 2026":18},
-  "Tony Vaughn":      {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":20,"Jun 2026":21,"Jul 2026":18},
-  "Trent Crabtree":   {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":21,"Jun 2026":21,"Jul 2026":18},
-  "Richard Smith":    {"Feb 2026":17,"Mar 2026":17,"Apr 2026":17,"May 2026":18,"Jun 2026":15,"Jul 2026":5},
-  "Kelly Young":      {"Feb 2026":12,"Mar 2026":15,"Apr 2026":8, "May 2026":11,"Jun 2026":8, "Jul 2026":5},
-  "Alyson Atwater":   {"Feb 2026":6, "Mar 2026":0, "Apr 2026":0, "May 2026":0, "Jun 2026":0, "Jul 2026":0},
-  "Dakota Hackworth": {"Feb 2026":0, "Mar 2026":10,"Apr 2026":20,"May 2026":22,"Jun 2026":21,"Jul 2026":18},
-  "Stephanie Sgambati":{"Feb 2026":0,"Mar 2026":0, "Apr 2026":0, "May 2026":5, "Jun 2026":14,"Jul 2026":12}
+var CORE=["Thomas Banks","Tony Vaughn","Trent Crabtree","Richard Smith","Kelly Young","Alyson Atwater","Dakota Hackworth","Stephanie Sgambati"];
+var MONTHS=["Oct 2025","Nov 2025","Dec 2025","Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026","Jul 2026","Aug 2026"];
+var AVG_START="Feb 2026";
+var STD_DAYS={"Feb 2026":19,"Mar 2026":21,"Apr 2026":22,"May 2026":21,"Jun 2026":21,"Jul 2026":23,"Aug 2026":21};
+var THRESHOLD=0.75;
+var CURRENT_MONTH="Aug 2026";
+var TRACK_MONTHS=["Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026","Jul 2026","Aug 2026"];
+var BASELINE_MONTH={"Thomas Banks":"Feb 2026","Tony Vaughn":"Feb 2026","Trent Crabtree":"Feb 2026","Richard Smith":"Feb 2026","Kelly Young":"Feb 2026","Alyson Atwater":"Feb 2026","Dakota Hackworth":"Mar 2026","Stephanie Sgambati":"Jun 2026"};
+var ACTIVE_DAYS={
+  "Thomas Banks":    {"Feb 2026":19,"Mar 2026":19,"Apr 2026":20,"May 2026":22,"Jun 2026":21,"Jul 2026":18,"Aug 2026":4},
+  "Tony Vaughn":     {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":20,"Jun 2026":21,"Jul 2026":18,"Aug 2026":3},
+  "Trent Crabtree":  {"Feb 2026":18,"Mar 2026":20,"Apr 2026":18,"May 2026":21,"Jun 2026":21,"Jul 2026":18,"Aug 2026":3},
+  "Richard Smith":   {"Feb 2026":17,"Mar 2026":17,"Apr 2026":17,"May 2026":18,"Jun 2026":15,"Jul 2026":5, "Aug 2026":0},
+  "Kelly Young":     {"Feb 2026":12,"Mar 2026":15,"Apr 2026":8, "May 2026":11,"Jun 2026":8, "Jul 2026":5, "Aug 2026":0},
+  "Alyson Atwater":  {"Feb 2026":6, "Mar 2026":0, "Apr 2026":0, "May 2026":0, "Jun 2026":0, "Jul 2026":0, "Aug 2026":0},
+  "Dakota Hackworth":{"Feb 2026":0, "Mar 2026":10,"Apr 2026":20,"May 2026":22,"Jun 2026":21,"Jul 2026":18,"Aug 2026":3},
+  "Stephanie Sgambati":{"Feb 2026":0,"Mar 2026":0,"Apr 2026":0,"May 2026":5,"Jun 2026":14,"Jul 2026":12,"Aug 2026":0}
 };
-var DATA = {
-  "Oct 2025":{weeks:["Oct 5-11","Oct 12-18","Oct 19-25","Oct 26-Nov1"],wd:[5,4,5,5],
-    modified:{"Thomas Banks":[0,0,0,0],"Tony Vaughn":[13,45,114,9],"Trent Crabtree":[161,88,148,36],"Richard Smith":[7,22,28,164],"Kelly Young":[284,82,405,164],"Alyson Atwater":[0,0,0,0],"Dakota Hackworth":[0,0,0,0],"Stephanie Sgambati":[0,0,0,0]},others_m:[5,5,149,0]},
-  "Nov 2025":{weeks:["Nov 2-8","Nov 9-15","Nov 16-22","Nov 23-29"],wd:[5,4,5,4],
-    modified:{"Thomas Banks":[0,0,0,0],"Tony Vaughn":[44,12,67,103],"Trent Crabtree":[89,75,51,15],"Richard Smith":[2,0,0,0],"Kelly Young":[109,8,28,2],"Alyson Atwater":[0,0,23,0],"Dakota Hackworth":[0,0,0,0],"Stephanie Sgambati":[0,0,0,0]},others_m:[1,16,82,18]},
-  "Dec 2025":{weeks:["Dec 7-13","Dec 14-20","Dec 21-27"],wd:[5,5,4],
-    modified:{"Thomas Banks":[0,0,0],"Tony Vaughn":[216,56,131],"Trent Crabtree":[111,65,23],"Richard Smith":[2,0,29],"Kelly Young":[0,0,0],"Alyson Atwater":[0,0,0],"Dakota Hackworth":[0,0,0],"Stephanie Sgambati":[0,0,0]},others_m:[27,43,6]},
-  "Jan 2026":{weeks:["Jan 1-3","Jan 4-10","Jan 11-17","Jan 18-24","Jan 25-31"],wd:[4,5,5,4,5],
-    modified:{"Thomas Banks":[0,0,0,0,151],"Tony Vaughn":[414,300,338,242,43],"Trent Crabtree":[71,104,105,37,149],"Richard Smith":[9,17,162,18,98],"Kelly Young":[2,2,2,1,96],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[0,0,0,0,0],"Stephanie Sgambati":[0,0,0,0,0]},others_m:[10,32,44,4,2]},
-  "Feb 2026":{weeks:["Feb 1-7","Feb 8-14","Feb 15-21","Feb 22-28"],wd:[5,5,4,5],
-    modified:{"Thomas Banks":[221,147,197,66],"Tony Vaughn":[154,242,211,127],"Trent Crabtree":[184,417,72,161],"Richard Smith":[31,183,9,27],"Kelly Young":[45,5,5,6],"Alyson Atwater":[34,2,0,0],"Dakota Hackworth":[0,0,0,0],"Stephanie Sgambati":[0,0,0,0]},others_m:[4,10,43,49]},
-  "Mar 2026":{weeks:["Mar 1-6","Mar 8-14","Mar 15-21","Mar 22-28","Mar 29-31"],wd:[5,5,5,5,3],
-    modified:{"Thomas Banks":[144,244,223,342,41],"Tony Vaughn":[227,138,257,121,51],"Trent Crabtree":[115,235,130,194,88],"Richard Smith":[44,35,17,25,8],"Kelly Young":[20,100,107,75,0],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[0,0,170,105,50],"Stephanie Sgambati":[0,0,0,0,0]},others_m:[52,67,90,84,0]},
-  "Apr 2026":{weeks:["Apr 1-4","Apr 5-11","Apr 12-18","Apr 19-24","Apr 28-30"],wd:[4,5,5,5,3],
-    modified:{"Thomas Banks":[93,123,137,163,102],"Tony Vaughn":[118,124,169,144,123],"Trent Crabtree":[91,281,209,287,115],"Richard Smith":[6,49,49,20,0],"Kelly Young":[1,13,1,1,0],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[113,174,294,186,155],"Stephanie Sgambati":[0,0,0,0,0]},others_m:[0,35,43,5,0]},
-  "May 2026":{weeks:["May 1-2","May 4-9","May 10-16","May 17-23","May 24-30"],wd:[2,5,5,5,5],
-    modified:{"Thomas Banks":[50,712,194,474,284],"Tony Vaughn":[64,121,116,100,171],"Trent Crabtree":[99,323,114,306,154],"Richard Smith":[0,22,48,48,67],"Kelly Young":[5,4,8,4,6],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[89,139,195,175,205],"Stephanie Sgambati":[0,0,2,1,0]},others_m:[16,31,47,3,0]},
-  "Jun 2026":{weeks:["Jun 1-6","Jun 7-13","Jun 14-20","Jun 21-27","Jun 28-30"],wd:[5,5,5,5,3],
-    modified:{"Thomas Banks":[366,196,169,136,68],"Tony Vaughn":[144,93,133,220,140],"Trent Crabtree":[260,141,179,152,161],"Richard Smith":[17,140,7,21,0],"Kelly Young":[12,7,1,0,11],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[171,204,117,228,111],"Stephanie Sgambati":[28,6,26,2,8]},others_m:[2,4,2,1,0]},
-  "Jul 2026":{weeks:["Jul 1-4","Jul 5-11","Jul 12-18","Jul 19-25"],wd:[4,5,5,5],
-    modified:{"Thomas Banks":[45,52,101,65],"Tony Vaughn":[62,272,180,198],"Trent Crabtree":[94,74,214,139],"Richard Smith":[0,0,1,1],"Kelly Young":[0,4,2,2],"Alyson Atwater":[0,0,0,0],"Dakota Hackworth":[61,160,127,97],"Stephanie Sgambati":[0,18,5,53]},others_m:[0,3,0,0]}
+var DATA={
+  "Oct 2025":{weeks:["Oct 5-11","Oct 12-18","Oct 19-25","Oct 26-Nov1"],wd:[5,4,5,5],modified:{"Thomas Banks":[0,0,0,0],"Tony Vaughn":[13,45,114,9],"Trent Crabtree":[161,88,148,36],"Richard Smith":[7,22,28,164],"Kelly Young":[284,82,405,164],"Alyson Atwater":[0,0,0,0],"Dakota Hackworth":[0,0,0,0],"Stephanie Sgambati":[0,0,0,0]},others_m:[5,5,149,0]},
+  "Nov 2025":{weeks:["Nov 2-8","Nov 9-15","Nov 16-22","Nov 23-29"],wd:[5,4,5,4],modified:{"Thomas Banks":[0,0,0,0],"Tony Vaughn":[44,12,67,103],"Trent Crabtree":[89,75,51,15],"Richard Smith":[2,0,0,0],"Kelly Young":[109,8,28,2],"Alyson Atwater":[0,0,23,0],"Dakota Hackworth":[0,0,0,0],"Stephanie Sgambati":[0,0,0,0]},others_m:[1,16,82,18]},
+  "Dec 2025":{weeks:["Dec 7-13","Dec 14-20","Dec 21-27"],wd:[5,5,4],modified:{"Thomas Banks":[0,0,0],"Tony Vaughn":[216,56,131],"Trent Crabtree":[111,65,23],"Richard Smith":[2,0,29],"Kelly Young":[0,0,0],"Alyson Atwater":[0,0,0],"Dakota Hackworth":[0,0,0],"Stephanie Sgambati":[0,0,0]},others_m:[27,43,6]},
+  "Jan 2026":{weeks:["Jan 1-3","Jan 4-10","Jan 11-17","Jan 18-24","Jan 25-31"],wd:[4,5,5,4,5],modified:{"Thomas Banks":[0,0,0,0,151],"Tony Vaughn":[414,300,338,242,43],"Trent Crabtree":[71,104,105,37,149],"Richard Smith":[9,17,162,18,98],"Kelly Young":[2,2,2,1,96],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[0,0,0,0,0],"Stephanie Sgambati":[0,0,0,0,0]},others_m:[10,32,44,4,2]},
+  "Feb 2026":{weeks:["Feb 1-7","Feb 8-14","Feb 15-21","Feb 22-28"],wd:[5,5,4,5],modified:{"Thomas Banks":[221,147,197,66],"Tony Vaughn":[154,242,211,127],"Trent Crabtree":[184,417,72,161],"Richard Smith":[31,183,9,27],"Kelly Young":[45,5,5,6],"Alyson Atwater":[34,2,0,0],"Dakota Hackworth":[0,0,0,0],"Stephanie Sgambati":[0,0,0,0]},others_m:[4,10,43,49]},
+  "Mar 2026":{weeks:["Mar 1-6","Mar 8-14","Mar 15-21","Mar 22-28","Mar 29-31"],wd:[5,5,5,5,3],modified:{"Thomas Banks":[144,244,223,342,41],"Tony Vaughn":[227,138,257,121,51],"Trent Crabtree":[115,235,130,194,88],"Richard Smith":[44,35,17,25,8],"Kelly Young":[20,100,107,75,0],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[0,0,170,105,50],"Stephanie Sgambati":[0,0,0,0,0]},others_m:[52,67,90,84,0]},
+  "Apr 2026":{weeks:["Apr 1-4","Apr 5-11","Apr 12-18","Apr 19-24","Apr 28-30"],wd:[4,5,5,5,3],modified:{"Thomas Banks":[93,123,137,163,102],"Tony Vaughn":[118,124,169,144,123],"Trent Crabtree":[91,281,209,287,115],"Richard Smith":[6,49,49,20,0],"Kelly Young":[1,13,1,1,0],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[113,174,294,186,155],"Stephanie Sgambati":[0,0,0,0,0]},others_m:[0,35,43,5,0]},
+  "May 2026":{weeks:["May 1-2","May 4-9","May 10-16","May 17-23","May 24-30"],wd:[2,5,5,5,5],modified:{"Thomas Banks":[50,712,194,474,284],"Tony Vaughn":[64,121,116,100,171],"Trent Crabtree":[99,323,114,306,154],"Richard Smith":[0,22,48,48,67],"Kelly Young":[5,4,8,4,6],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[89,139,195,175,205],"Stephanie Sgambati":[0,0,2,1,0]},others_m:[16,31,47,3,0]},
+  "Jun 2026":{weeks:["Jun 1-6","Jun 7-13","Jun 14-20","Jun 21-27","Jun 28-30"],wd:[5,5,5,5,3],modified:{"Thomas Banks":[366,196,169,136,68],"Tony Vaughn":[144,93,133,220,140],"Trent Crabtree":[260,141,179,152,161],"Richard Smith":[17,140,7,21,0],"Kelly Young":[12,7,1,0,11],"Alyson Atwater":[0,0,0,0,0],"Dakota Hackworth":[171,204,117,228,111],"Stephanie Sgambati":[28,6,26,2,8]},others_m:[2,4,2,1,0]},
+  "Jul 2026":{weeks:["Jul 1-4","Jul 5-11","Jul 12-18","Jul 19-25"],wd:[4,5,5,5],modified:{"Thomas Banks":[45,52,101,65],"Tony Vaughn":[62,272,180,198],"Trent Crabtree":[94,74,214,139],"Richard Smith":[0,0,1,1],"Kelly Young":[0,4,2,2],"Alyson Atwater":[0,0,0,0],"Dakota Hackworth":[61,160,127,97],"Stephanie Sgambati":[0,18,5,53]},others_m:[0,3,0,0]},
+  "Aug 2026":{weeks:["Aug 2-8"],wd:[4],modified:{"Thomas Banks":[60],"Tony Vaughn":[86],"Trent Crabtree":[92],"Richard Smith":[0],"Kelly Young":[0],"Alyson Atwater":[0],"Dakota Hackworth":[34],"Stephanie Sgambati":[0]},others_m:[0]}
 };
-var TRIPS_STAFF = ["Richard Smith","Dakota Hackworth","Tony Vaughn","Kelly Young","Trent Crabtree","Thomas Banks"];
-var TRIPS_MONTHS = ["Nov 2025","Dec 2025","Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026","Jul 2026"];
-var TRIPS_MONTHLY = {
-  "Nov 2025":{"Richard Smith":63,"Dakota Hackworth":0,  "Tony Vaughn":0,  "Kelly Young":0,  "Trent Crabtree":0, "Thomas Banks":0},
-  "Dec 2025":{"Richard Smith":58,"Dakota Hackworth":0,  "Tony Vaughn":0,  "Kelly Young":0,  "Trent Crabtree":0, "Thomas Banks":0},
-  "Jan 2026":{"Richard Smith":67,"Dakota Hackworth":0,  "Tony Vaughn":0,  "Kelly Young":25, "Trent Crabtree":0, "Thomas Banks":0},
-  "Feb 2026":{"Richard Smith":45,"Dakota Hackworth":0,  "Tony Vaughn":12, "Kelly Young":0,  "Trent Crabtree":4, "Thomas Banks":0},
-  "Mar 2026":{"Richard Smith":175,"Dakota Hackworth":98,"Tony Vaughn":20, "Kelly Young":0,  "Trent Crabtree":4, "Thomas Banks":0},
-  "Apr 2026":{"Richard Smith":130,"Dakota Hackworth":112,"Tony Vaughn":30,"Kelly Young":0,  "Trent Crabtree":2, "Thomas Banks":0},
-  "May 2026":{"Richard Smith":15,"Dakota Hackworth":81, "Tony Vaughn":18, "Kelly Young":0,  "Trent Crabtree":1, "Thomas Banks":0},
-  "Jun 2026":{"Richard Smith":1, "Dakota Hackworth":78, "Tony Vaughn":11, "Kelly Young":0,  "Trent Crabtree":15,"Thomas Banks":0},
-  "Jul 2026":{"Richard Smith":2, "Dakota Hackworth":155,"Tony Vaughn":19, "Kelly Young":0,  "Trent Crabtree":19,"Thomas Banks":0}
+var TRIPS_STAFF=["Richard Smith","Dakota Hackworth","Tony Vaughn","Kelly Young","Trent Crabtree","Thomas Banks"];
+var TRIPS_MONTHS=["Nov 2025","Dec 2025","Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026","Jul 2026"];
+var TRIPS_MONTHLY={
+  "Nov 2025":{"Richard Smith":63,"Dakota Hackworth":0,  "Tony Vaughn":0,  "Kelly Young":0, "Trent Crabtree":0, "Thomas Banks":0},
+  "Dec 2025":{"Richard Smith":58,"Dakota Hackworth":0,  "Tony Vaughn":0,  "Kelly Young":0, "Trent Crabtree":0, "Thomas Banks":0},
+  "Jan 2026":{"Richard Smith":67,"Dakota Hackworth":0,  "Tony Vaughn":0,  "Kelly Young":25,"Trent Crabtree":0, "Thomas Banks":0},
+  "Feb 2026":{"Richard Smith":45,"Dakota Hackworth":0,  "Tony Vaughn":12, "Kelly Young":0, "Trent Crabtree":4, "Thomas Banks":0},
+  "Mar 2026":{"Richard Smith":175,"Dakota Hackworth":98,"Tony Vaughn":20, "Kelly Young":0, "Trent Crabtree":4, "Thomas Banks":0},
+  "Apr 2026":{"Richard Smith":130,"Dakota Hackworth":112,"Tony Vaughn":30,"Kelly Young":0, "Trent Crabtree":2, "Thomas Banks":0},
+  "May 2026":{"Richard Smith":15,"Dakota Hackworth":81, "Tony Vaughn":18, "Kelly Young":0, "Trent Crabtree":1, "Thomas Banks":0},
+  "Jun 2026":{"Richard Smith":1, "Dakota Hackworth":78, "Tony Vaughn":11, "Kelly Young":0, "Trent Crabtree":15,"Thomas Banks":0},
+  "Jul 2026":{"Richard Smith":2, "Dakota Hackworth":155,"Tony Vaughn":19, "Kelly Young":0, "Trent Crabtree":19,"Thomas Banks":0}
 };
-var PERF_NOTES = {
+var PERF_NOTES={
   "Thomas Banks":{strengths:["YTD leader in claims created. Took ownership of paper backlog from Jan 2026.","Strong Q2 FY2026 — 631 modified in Feb, 994 in Mar.","Works across all three primary workflows: paper claims creation, CITC, and Manual Review."],development:["Two documented entry errors this quarter — both self-reported immediately and corrected prior to payment processing. No financial impact.","Month-to-month variance partially explained by window rotation and calendar factors."],goals:["Target 50+ avg/day. Reduce variance. Continue cross-workflow flexibility."],q3goals:["Target ≥950 modified per month.","Maintain daily avg of 45+ claims on active days.","Meet 75% threshold every month.","No recurrence of wrong-Veteran entry errors."]},
   "Tony Vaughn":{strengths:["Primary CITC claims processor. Deep expertise in complex community claim verification.","Served as primary trainer for Thomas Banks (Jan 10–Feb 9, 2026) and Dakota Hackworth (Feb 21–Mar 22, 2026).","Continues to provide ongoing mentorship to Dakota Hackworth as a supervisor-directed responsibility."],development:["Month-to-month variance — consistency on processing weeks is primary development area.","Mentorship duties reduce available processing time on some days — accounted for in evaluation."],goals:["Maintain avg/day ≥35. Target 50+ on non-window/non-mentorship days. Sustain 75% threshold."],q3goals:["Target ≥650 modified per month.","Maintain daily avg of 40+ claims.","Meet 75% threshold all 3 months of Q3.","Document ongoing mentorship activities."]},
-  "Trent Crabtree":{strengths:["Primary Manual Review claims processor — highest-complexity queue on team.","Apr 2026 — 983 modified, highest single month on team for Q2.","Daily avg approaching Exceptional standard of 45/day."],development:["Largest variance on team. Window rotation explains some dips but processing-week consistency needs improvement."],goals:["Establish weekly minimum floor. Target 75% threshold every month. Reduce variance."],q3goals:["Target ≥850 modified per month.","Maintain daily avg of 45+ claims.","First quarter with perfect threshold pass rate.","No week below 150 claims when fully active."]},
-  "Richard Smith":{strengths:["Supervisor/lead role — volume reflects dual processing and supervisory responsibilities.","Strong Jan 2026 (304 modified) demonstrating processing capability.","Consistent presence across multiple months."],development:["Declining trend requires focused attention and discussion.","Missed 75% threshold both evaluated months."],goals:["Target ≥150 modified per month. Document supervisory hours separately. Meet 75% threshold at least 2 of 3 months in Q3."],q3goals:["Reverse declining trend — 150+ modified per month minimum.","Maintain daily avg of 10+ on active days.","Meet 75% threshold at least 2 of 3 months.","Document supervisory contributions formally."]},
-  "Kelly Young":{strengths:["935 modified in Oct 2025 — exceptional Q1 performance.","Strong Mar 2026 reengagement (302 modified).","High-capacity processor when fully active."],development:["Extreme inconsistency — Mar (302) vs Apr (16). Only 1 of 2 months met 75% threshold.","Consistency is the core development area."],goals:["No zero-output weeks. Full-month consistency every month. Document any absences."],q3goals:["Target ≥150 modified every month of Q3.","Meet 75% threshold all 3 months.","No near-zero months."]},
+  "Trent Crabtree":{strengths:["Primary Manual Review claims processor — highest-complexity queue on team.","Apr 2026 — 983 modified, highest single month on team for Q2.","Only employee to meet Exceptional contribution threshold every evaluated month."],development:["Largest variance on team. Window rotation explains some dips but processing-week consistency needs improvement."],goals:["Establish weekly minimum floor. Target 75% threshold every month. Reduce variance."],q3goals:["Target ≥850 modified per month.","Maintain daily avg of 45+ claims.","First quarter with perfect threshold pass rate.","No week below 150 claims when fully active."]},
+  "Richard Smith":{strengths:["Supervisor/lead role — volume reflects dual processing and supervisory responsibilities.","Strong Jan 2026 (304 modified) demonstrating processing capability.","Consistent presence across multiple months."],development:["Declining trend requires focused attention and discussion.","Missed 75% threshold all evaluated months — supervisory hours need formal documentation."],goals:["Target ≥150 modified per month. Document supervisory hours separately. Meet 75% threshold at least 2 of 3 months in Q3."],q3goals:["Reverse declining trend — 150+ modified per month minimum.","Maintain daily avg of 10+ on active days.","Meet 75% threshold at least 2 of 3 months.","Document supervisory contributions formally."]},
+  "Kelly Young":{strengths:["935 modified in Oct 2025 — exceptional Q1 performance.","Strong Mar 2026 reengagement (302 modified).","High-capacity processor when fully active."],development:["Extreme inconsistency across rating period. Below standard every evaluated month.","Consistency is the core development area."],goals:["No zero-output weeks. Full-month consistency every month. Document any absences."],q3goals:["Target ≥150 modified every month of Q3.","Meet 75% threshold all 3 months.","No near-zero months."]},
   "Alyson Atwater":{strengths:["Active contributor Oct–Feb. Solid productivity in Nov 2025.","Cross-trained on both created and modified workflows."],development:["No recorded activity from Mar 2026 onward — status must be confirmed with supervisor."],goals:["Confirm role and assignment. Re-establish targets if active."],q3goals:["Confirm employment status before Q3 begins.","If active: target ≥50 modified per month.","If active: no zero-output weeks."]},
-  "Dakota Hackworth":{strengths:["Primary paper claims creator and ride scheduler — 369 cumulative trips Nov 2025–Jun 2026.","Apr 2026 — 922 modified (1,034 combined with rides), highest on team for Q2.","Dual-workflow contributor from first week of employment."],development:["Weekly floor not yet established — variance between weeks is the primary development area.","Leave usage above team average — encouraged to manage proactively."],goals:["Sustain 300+ modified monthly. Meet 75% threshold every month. Establish weekly floor."],q3goals:["Target ≥600 modified per month.","Maintain daily avg of 40+ claims.","Meet 75% threshold all 3 months.","Weekly floor of 125+ claims when fully active."]},
-  "Stephanie Sgambati":{strengths:["New team member — early contributions show engagement.","Active and contributing from first tracked weeks."],development:["First full month will establish baseline. Focus on consistency and building volume."],goals:["Establish baseline avg/day. Build consistent weekly output."],q3goals:["Establish baseline in Jun 2026.","Target ≥50 modified in Jun 2026.","Build toward 75% threshold from Jul 2026."]}
+  "Dakota Hackworth":{strengths:["Primary paper claims creator and ride scheduler — 524 cumulative trips Nov 2025–Jul 2026.","Apr 2026 — 922 modified (1,034 combined with rides), highest on team for Q2.","Dual-workflow contributor from first week of employment."],development:["Weekly floor not yet established — variance between weeks is the primary development area.","Leave usage above team average — encouraged to manage proactively."],goals:["Sustain 300+ modified monthly. Meet 75% threshold every month. Establish weekly floor."],q3goals:["Target ≥600 modified per month.","Maintain daily avg of 40+ claims.","Meet 75% threshold all 3 months.","Weekly floor of 125+ claims when fully active."]},
+  "Stephanie Sgambati":{strengths:["New team member — early contributions show engagement.","Active and contributing from first tracked weeks."],development:["First full month will establish baseline. Focus on consistency and building volume."],goals:["Establish baseline avg/day. Build consistent weekly output."],q3goals:["Establish baseline in Jun 2026.","Target ≥50 modified per month.","Build toward 75% threshold from Jul 2026."]}
 };
 
 function modTotal(mo,name){var d=DATA[mo];return d&&d.modified[name]?d.modified[name].reduce(function(a,b){return a+b;},0):0;}
@@ -182,14 +174,7 @@ function pct(a,b){return b>0?Math.round(a/b*100):0;}
 var currentMonth="YTD",currentTab="summary";
 function switchTab(tab,el){currentTab=tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});el.classList.add('active');document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});document.getElementById('panel-'+tab).classList.add('active');renderPanel(tab);}
 function setMonth(mo,el){currentMonth=mo;document.querySelectorAll('.mbtn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');renderPanel(currentTab);}
-function renderPanel(tab){
-  if(tab==='summary')renderSummary();
-  if(tab==='weekly')renderWeekly();
-  if(tab==='leaderboard')renderLeaderboard();
-  if(tab==='threshold')renderThreshold();
-  if(tab==='trips')renderTrips();
-  if(tab==='notes')renderNotes();
-}
+function renderPanel(tab){if(tab==='summary')renderSummary();if(tab==='weekly')renderWeekly();if(tab==='leaderboard')renderLeaderboard();if(tab==='threshold')renderThreshold();if(tab==='trips')renderTrips();if(tab==='notes')renderNotes();}
 
 function renderSummary(){
   var isYTD=currentMonth==='YTD',months=isYTD?MONTHS:[currentMonth],label=isYTD?'YTD FY2026':currentMonth;
@@ -203,16 +188,8 @@ function renderSummary(){
 }
 
 function renderWeekly(){
-  var isYTD=currentMonth==='YTD',months=isYTD?MONTHS:[currentMonth];
-  var html='';
-  months.forEach(function(mo){
-    var d=DATA[mo];if(!d)return;
-    html+='<div class="card" style="margin-bottom:16px"><div class="card-title">📅 '+mo+' — Weekly Breakdown</div><table><thead><tr><th class="left">Staff Member</th>'+d.weeks.map(function(w){return'<th>'+w+'</th>';}).join('')+'<th>Total</th><th>Avg/Day</th></tr></thead><tbody>'+
-    CORE.map(function(n){var vals=d.modified[n]||[],t=vals.reduce(function(a,b){return a+b;},0);return'<tr><td class="left">'+n+'</td>'+vals.map(function(v){return'<td class="num">'+fmt(v)+'</td>';}).join('')+'<td class="num" style="font-weight:700;color:var(--navy)">'+fmt(t)+'</td><td class="num">'+avgDay(mo,n)+'</td></tr>';}).join('')+
-    '<tr><td class="left" style="color:var(--muted);font-style:italic">Other Staff</td>'+d.others_m.map(function(v){return'<td class="num" style="color:var(--muted)">'+fmt(v)+'</td>';}).join('')+'<td class="num" style="color:var(--muted)">'+fmt(d.others_m.reduce(function(a,b){return a+b;},0))+'</td><td>—</td></tr>'+
-    '<tr class="total-row"><td class="left">Grand Total</td>'+d.weeks.map(function(_,wi){return'<td class="num">'+(CORE.reduce(function(s,n){return s+((d.modified[n]&&d.modified[n][wi])||0);},0)+d.others_m[wi]).toLocaleString()+'</td>';}).join('')+'<td class="num">'+(CORE.reduce(function(s,n){return s+modTotal(mo,n);},0)+d.others_m.reduce(function(a,b){return a+b;},0)).toLocaleString()+'</td><td>—</td></tr>'+
-    '</tbody></table></div>';
-  });
+  var isYTD=currentMonth==='YTD',months=isYTD?MONTHS:[currentMonth],html='';
+  months.forEach(function(mo){var d=DATA[mo];if(!d)return;html+='<div class="card" style="margin-bottom:16px"><div class="card-title">📅 '+mo+' — Weekly Breakdown</div><table><thead><tr><th class="left">Staff Member</th>'+d.weeks.map(function(w){return'<th>'+w+'</th>';}).join('')+'<th>Total</th><th>Avg/Day</th></tr></thead><tbody>'+CORE.map(function(n){var vals=d.modified[n]||[],t=vals.reduce(function(a,b){return a+b;},0);return'<tr><td class="left">'+n+'</td>'+vals.map(function(v){return'<td class="num">'+fmt(v)+'</td>';}).join('')+'<td class="num" style="font-weight:700;color:var(--navy)">'+fmt(t)+'</td><td class="num">'+avgDay(mo,n)+'</td></tr>';}).join('')+'<tr><td class="left" style="color:var(--muted);font-style:italic">Other Staff</td>'+d.others_m.map(function(v){return'<td class="num" style="color:var(--muted)">'+fmt(v)+'</td>';}).join('')+'<td class="num" style="color:var(--muted)">'+fmt(d.others_m.reduce(function(a,b){return a+b;},0))+'</td><td>—</td></tr><tr class="total-row"><td class="left">Grand Total</td>'+d.weeks.map(function(_,wi){return'<td class="num">'+(CORE.reduce(function(s,n){return s+((d.modified[n]&&d.modified[n][wi])||0);},0)+d.others_m[wi]).toLocaleString()+'</td>';}).join('')+'<td class="num">'+(CORE.reduce(function(s,n){return s+modTotal(mo,n);},0)+d.others_m.reduce(function(a,b){return a+b;},0)).toLocaleString()+'</td><td>—</td></tr></tbody></table></div>';});
   document.getElementById('panel-weekly').innerHTML=html;
 }
 
@@ -243,37 +220,26 @@ function renderThreshold(){
     var rateBadge=rate===null?'<span class="badge-ref">—</span>':rate===100?'<span class="badge-met">'+rate+'%</span>':rate>=75?'<span class="badge-warn">'+rate+'%</span>':'<span class="badge-miss">'+rate+'%</span>';
     return'<tr><td class="left">'+name+'<br><span style="font-size:10px;color:var(--muted);font-weight:400">baseline: '+baseMo+' = '+baseVal.toLocaleString()+' · '+dailyRate+' claims/day</span></td>'+cells+'<td class="num" style="font-weight:700">'+(total>0?met+'/'+total:'—')+'</td><td>'+rateBadge+'</td></tr>';
   }).join('');
-  document.getElementById('panel-threshold').innerHTML='<div class="card" style="margin-bottom:12px"><div class="card-title">ℹ️ How This Works</div><div style="padding:10px 16px;font-size:12px;color:var(--muted);line-height:1.7">Fixed baseline per employee (first full month). Daily rate × days actually worked × 75% = monthly target. Leave days auto-detected and pro-rated. <span style="color:var(--amber)">📅 = fewer than standard days worked.</span> <strong>⏳ '+CURRENT_MONTH+' is the current month and is excluded from pass rate until closed.</strong></div></div><div class="card"><div class="card-title">⚠️ 75% Pro-Rated Fixed Baseline Threshold — Feb 2026 onward</div><div style="overflow-x:auto"><table><thead><tr><th class="left">Staff Member</th>'+TRACK_MONTHS.map(function(m){return'<th>'+m+(m===CURRENT_MONTH?' ⏳':'')+'</th>';}).join('')+'<th>Months Met</th><th>Pass Rate</th></tr></thead><tbody>'+rows+'<tr class="total-row"><td class="left">Team Total</td>'+TRACK_MONTHS.map(function(m){return'<td class="num">'+CORE.reduce(function(s,n){return s+modTotal(m,n);},0).toLocaleString()+'</td>';}).join('')+'<td>—</td><td>—</td></tr></tbody></table></div></div>';
+  document.getElementById('panel-threshold').innerHTML='<div class="card" style="margin-bottom:12px"><div class="card-title">ℹ️ How This Works</div><div style="padding:10px 16px;font-size:12px;color:var(--muted);line-height:1.7">Fixed baseline per employee (first full month). Daily rate × days actually worked × 75% = monthly target. Leave days auto-detected and pro-rated. <span style="color:var(--amber)">📅 = fewer than standard days worked.</span> <strong>⏳ '+CURRENT_MONTH+' excluded until month closes.</strong></div></div><div class="card"><div class="card-title">⚠️ 75% Pro-Rated Fixed Baseline Threshold</div><div style="overflow-x:auto"><table><thead><tr><th class="left">Staff Member</th>'+TRACK_MONTHS.map(function(m){return'<th>'+m+(m===CURRENT_MONTH?' ⏳':'')+'</th>';}).join('')+'<th>Met</th><th>Rate</th></tr></thead><tbody>'+rows+'<tr class="total-row"><td class="left">Team Total</td>'+TRACK_MONTHS.map(function(m){return'<td class="num">'+CORE.reduce(function(s,n){return s+modTotal(m,n);},0).toLocaleString()+'</td>';}).join('')+'<td>—</td><td>—</td></tr></tbody></table></div></div>';
 }
 
 function renderTrips(){
   var grandTotal=TRIPS_STAFF.reduce(function(s,n){return s+tripsTotal(n);},0);
   var topName=TRIPS_STAFF.reduce(function(b,n){return tripsTotal(n)>tripsTotal(b)?n:b;},TRIPS_STAFF[0]);
   var sorted=TRIPS_STAFF.slice().sort(function(a,b){return tripsTotal(b)-tripsTotal(a);});
-  var rows=sorted.map(function(name,ri){
-    var moVals=TRIPS_MONTHS.map(function(m){return(TRIPS_MONTHLY[m]&&TRIPS_MONTHLY[m][name])||0;});
-    var total=tripsTotal(name);
-    return'<tr style="background:'+(ri%2===0?'var(--stripe)':'#fff')+'"><td class="left">'+name+'</td>'+moVals.map(function(v){return'<td class="num">'+(v>0?v.toLocaleString():'<span class="dash">—</span>')+'</td>';}).join('')+'<td class="num" style="font-weight:700;color:var(--navy)">'+(total>0?total.toLocaleString():'<span class="dash">—</span>')+'</td></tr>';
-  }).join('');
+  var rows=sorted.map(function(name,ri){var moVals=TRIPS_MONTHS.map(function(m){return(TRIPS_MONTHLY[m]&&TRIPS_MONTHLY[m][name])||0;});var total=tripsTotal(name);return'<tr style="background:'+(ri%2===0?'var(--stripe)':'#fff')+'"><td class="left">'+name+'</td>'+moVals.map(function(v){return'<td class="num">'+(v>0?v.toLocaleString():'<span class="dash">—</span>')+'</td>';}).join('')+'<td class="num" style="font-weight:700;color:var(--navy)">'+(total>0?total.toLocaleString():'<span class="dash">—</span>')+'</td></tr>';}).join('');
   var teamRow='<tr class="total-row"><td class="left">Team Total</td>'+TRIPS_MONTHS.map(function(m){var t=tripsMoTotal(m);return'<td class="num">'+(t>0?t.toLocaleString():'—')+'</td>';}).join('')+'<td class="num">'+grandTotal.toLocaleString()+'</td></tr>';
-  document.getElementById('panel-trips').innerHTML='<div class="stat-row"><div class="stat-card"><div class="stat-label">Total Trips Scheduled</div><div class="stat-val num">'+grandTotal.toLocaleString()+'</div><div class="stat-sub">Nov 2025 – Jul 2026</div></div><div class="stat-card gold"><div class="stat-label">Top Scheduler</div><div class="stat-val" style="font-size:16px;padding-top:4px">'+topName.split(' ')[0]+'</div><div class="stat-sub">'+tripsTotal(topName).toLocaleString()+' trips</div></div><div class="stat-card green"><div class="stat-label">Staff Contributing</div><div class="stat-val num">'+TRIPS_STAFF.filter(function(n){return tripsTotal(n)>0;}).length+'</div><div class="stat-sub">of '+TRIPS_STAFF.length+' tracked</div></div><div class="stat-card navy"><div class="stat-label">Jul 2026</div><div class="stat-val num">'+tripsMoTotal('Jul 2026')+'</div><div class="stat-sub">Latest month</div></div></div><div class="card"><div class="card-title">🚐 Trips Scheduled by Staff — Nov 2025 through Jul 2026</div><div style="overflow-x:auto"><table><thead><tr><th class="left">Staff Member</th>'+TRIPS_MONTHS.map(function(m){return'<th>'+m+'</th>';}).join('')+'<th>YTD Total</th></tr></thead><tbody>'+rows+teamRow+'</tbody></table></div></div><div class="card"><div class="card-title">ℹ️ About Trips Data</div><div style="padding:10px 16px;font-size:12px;color:var(--muted);line-height:1.7">Trips include VetRide coordination and Community transportation authorizations. Data covers Nov 2025 through present.</div></div>';
+  document.getElementById('panel-trips').innerHTML='<div class="stat-row"><div class="stat-card"><div class="stat-label">Total Trips</div><div class="stat-val num">'+grandTotal.toLocaleString()+'</div><div class="stat-sub">Nov 2025 – Jul 2026</div></div><div class="stat-card gold"><div class="stat-label">Top Scheduler</div><div class="stat-val" style="font-size:16px;padding-top:4px">'+topName.split(' ')[0]+'</div><div class="stat-sub">'+tripsTotal(topName).toLocaleString()+' trips</div></div><div class="stat-card green"><div class="stat-label">Staff Contributing</div><div class="stat-val num">'+TRIPS_STAFF.filter(function(n){return tripsTotal(n)>0;}).length+'</div><div class="stat-sub">of '+TRIPS_STAFF.length+' tracked</div></div><div class="stat-card navy"><div class="stat-label">Jul 2026</div><div class="stat-val num">'+tripsMoTotal('Jul 2026')+'</div><div class="stat-sub">Latest complete month</div></div></div><div class="card"><div class="card-title">🚐 Trips Scheduled — Nov 2025 through Jul 2026</div><div style="overflow-x:auto"><table><thead><tr><th class="left">Staff Member</th>'+TRIPS_MONTHS.map(function(m){return'<th>'+m+'</th>';}).join('')+'<th>Total</th></tr></thead><tbody>'+rows+teamRow+'</tbody></table></div></div>';
 }
 
 function renderNotes(){
   var html='<div class="perf-grid">'+CORE.map(function(name){
-    var ytd=ytdTotal(name),avg=ytdAvgDay(name);
-    var notes=PERF_NOTES[name]||{strengths:["Active contributor."],development:["Continue monitoring."],goals:["Maintain current pace."],q3goals:["Maintain current pace."]};
+    var ytd=ytdTotal(name),avg=ytdAvgDay(name),notes=PERF_NOTES[name]||{strengths:["Active contributor."],development:["Continue monitoring."],goals:["Maintain current pace."],q3goals:["Maintain current pace."]};
     var bestMo=MONTHS.reduce(function(b,m){return modTotal(m,name)>modTotal(b,name)?m:b;},MONTHS[0]);
     var baseMo=BASELINE_MONTH[name]||"Feb 2026",baseVal=modTotal(baseMo,name),stdBase=STD_DAYS[baseMo]||21,dailyRate=baseVal>0?(baseVal/stdBase).toFixed(1):"—";
     var threshMet=0,threshTotal=0;
-    TRACK_MONTHS.forEach(function(mo){
-      if(mo===baseMo||mo===CURRENT_MONTH||TRACK_MONTHS.indexOf(mo)<TRACK_MONTHS.indexOf(baseMo)||!baseVal)return;
-      var t=modTotal(mo,name),ad=getActiveDays(mo,name),stdMo=STD_DAYS[mo]||21,needed=Math.round((baseVal/stdBase)*(ad>0?ad:stdMo)*THRESHOLD);
-      threshTotal++;if(t>=needed)threshMet++;
-    });
-    return'<div class="perf-card"><div class="perf-head"><span>'+name+'</span><span style="font-size:11px;font-weight:400;opacity:.7">YTD: '+ytd.toLocaleString()+' claims</span></div>'+
-    '<div class="perf-stats"><div class="ps"><div class="ps-val">'+ytd.toLocaleString()+'</div><div class="ps-lbl">YTD Total</div></div><div class="ps"><div class="ps-val">'+avg+'</div><div class="ps-lbl">Avg/Day</div></div><div class="ps"><div class="ps-val" style="font-size:13px">'+bestMo.split(' ')[0]+'</div><div class="ps-lbl">Best Month</div></div><div class="ps"><div class="ps-val">'+modTotal(bestMo,name).toLocaleString()+'</div><div class="ps-lbl">Best Mo Total</div></div><div class="ps"><div class="ps-val">'+dailyRate+'</div><div class="ps-lbl">Base Rate/Day</div></div><div class="ps"><div class="ps-val">'+(threshTotal>0?threshMet+'/'+threshTotal:'—')+'</div><div class="ps-lbl">75% Met</div></div></div>'+
-    '<div class="perf-body"><div class="perf-section"><h4>✅ Strengths</h4><ul>'+notes.strengths.map(function(s){return'<li>'+s+'</li>';}).join('')+'</ul></div><div class="perf-section"><h4>⚠️ Development Areas</h4><ul>'+notes.development.map(function(s){return'<li>'+s+'</li>';}).join('')+'</ul></div><div class="perf-section" style="grid-column:1/-1"><h4>🎯 Current Goals</h4><ul>'+notes.goals.map(function(s){return'<li>'+s+'</li>';}).join('')+'</ul></div><div class="perf-section" style="grid-column:1/-1;background:#f0f4f9;border-radius:8px;padding:10px;margin-top:4px"><h4 style="color:var(--navy)">📅 Q3 2026 Goals (Jun–Aug)</h4><ul>'+(notes.q3goals||[]).map(function(s){return'<li>'+s+'</li>';}).join('')+'</ul></div></div></div>';
+    TRACK_MONTHS.forEach(function(mo){if(mo===baseMo||mo===CURRENT_MONTH||TRACK_MONTHS.indexOf(mo)<TRACK_MONTHS.indexOf(baseMo)||!baseVal)return;var t=modTotal(mo,name),ad=getActiveDays(mo,name),stdMo=STD_DAYS[mo]||21,needed=Math.round((baseVal/stdBase)*(ad>0?ad:stdMo)*THRESHOLD);threshTotal++;if(t>=needed)threshMet++;});
+    return'<div class="perf-card"><div class="perf-head"><span>'+name+'</span><span style="font-size:11px;font-weight:400;opacity:.7">YTD: '+ytd.toLocaleString()+' claims</span></div><div class="perf-stats"><div class="ps"><div class="ps-val">'+ytd.toLocaleString()+'</div><div class="ps-lbl">YTD Total</div></div><div class="ps"><div class="ps-val">'+avg+'</div><div class="ps-lbl">Avg/Day</div></div><div class="ps"><div class="ps-val" style="font-size:13px">'+bestMo.split(' ')[0]+'</div><div class="ps-lbl">Best Month</div></div><div class="ps"><div class="ps-val">'+modTotal(bestMo,name).toLocaleString()+'</div><div class="ps-lbl">Best Mo Total</div></div><div class="ps"><div class="ps-val">'+dailyRate+'</div><div class="ps-lbl">Base Rate/Day</div></div><div class="ps"><div class="ps-val">'+(threshTotal>0?threshMet+'/'+threshTotal:'—')+'</div><div class="ps-lbl">75% Met</div></div></div><div class="perf-body"><div class="perf-section"><h4>✅ Strengths</h4><ul>'+notes.strengths.map(function(s){return'<li>'+s+'</li>';}).join('')+'</ul></div><div class="perf-section"><h4>⚠️ Development Areas</h4><ul>'+notes.development.map(function(s){return'<li>'+s+'</li>';}).join('')+'</ul></div><div class="perf-section" style="grid-column:1/-1"><h4>🎯 Current Goals</h4><ul>'+notes.goals.map(function(s){return'<li>'+s+'</li>';}).join('')+'</ul></div><div class="perf-section" style="grid-column:1/-1;background:#f0f4f9;border-radius:8px;padding:10px;margin-top:4px"><h4 style="color:var(--navy)">📅 Q3 2026 Goals (Jun–Aug)</h4><ul>'+(notes.q3goals||[]).map(function(s){return'<li>'+s+'</li>';}).join('')+'</ul></div></div></div>';
   }).join('')+'</div>';
   document.getElementById('panel-notes').innerHTML=html;
 }
